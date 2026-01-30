@@ -101,7 +101,7 @@ function drawCountryTitle() {
     
     // Set text properties first
     textSize(32);
-    textFont('Arial');
+    textFont('Assistant');
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
     
