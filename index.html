@@ -728,21 +728,30 @@
         
         .skip-video-btn {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid white;
-            padding: 10px 25px;
-            border-radius: 25px;
+            right: 60px;
+            bottom: 60px;
+            left: auto;
+            transform: none;
+            background: rgba(255,255,255,0.85);
+            color: #000000;
+            border: 2px solid #000000;
+            padding: 18px 48px;
+            border-radius: 32px;
             cursor: pointer;
             font-family: 'Rubik', sans-serif;
-            font-size: 1rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: var(--transition);
         }
         
         .skip-video-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #ededed;
+            color: #000000;
+            border-color: #000000;
         }
         
         /* ============================================
@@ -1528,7 +1537,7 @@
     <!-- Auth Screen -->
     <div id="auth-screen" class="auth-screen">
         <div class="auth-container">
-            <h2 id="auth-title">התחברות / הרשמה</h2>
+            <h2 id="auth-title"></h2>
             
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="showLoginForm()">התחברות</button>
@@ -1537,24 +1546,24 @@
             
             <!-- Login Form -->
             <div id="login-form" class="auth-form">
-                <input type="email" id="login-email" placeholder="אימייל / Email" autocomplete="email">
-                <input type="password" id="login-password" placeholder="סיסמה / Password" autocomplete="current-password">
+                <input type="email" id="login-email" placeholder="" autocomplete="email">
+                <input type="password" id="login-password" placeholder="" autocomplete="current-password">
                 <div id="login-error" class="auth-error"></div>
-                <button class="btn btn-primary full-width" onclick="handleLogin()">התחבר / Login</button>
+                <button class="btn btn-primary full-width" onclick="handleLogin()"></button>
             </div>
             
             <!-- Register Form -->
             <div id="register-form" class="auth-form" style="display: none;">
-                <input type="text" id="register-name" placeholder="שם משתמש / Username" autocomplete="name">
-                <input type="email" id="register-email" placeholder="אימייל / Email" autocomplete="email">
-                <input type="password" id="register-password" placeholder="סיסמה / Password" autocomplete="new-password">
-                <input type="password" id="register-confirm" placeholder="אימות סיסמה / Confirm Password" autocomplete="new-password">
+                <input type="text" id="register-name" placeholder="" autocomplete="name">
+                <input type="email" id="register-email" placeholder="" autocomplete="email">
+                <input type="password" id="register-password" placeholder="" autocomplete="new-password">
+                <input type="password" id="register-confirm" placeholder="" autocomplete="new-password">
                 <div id="register-error" class="auth-error"></div>
-                <button class="btn btn-primary full-width" onclick="handleRegister()">הרשם / Register</button>
+                <button class="btn btn-primary full-width" onclick="handleRegister()"></button>
             </div>
             
             <div class="auth-skip">
-                <button class="btn btn-secondary" onclick="skipAuth()">המשך כאורח / Continue as Guest</button>
+                <button class="btn btn-secondary" onclick="skipAuth()"></button>
             </div>
         </div>
     </div>
@@ -1569,13 +1578,17 @@
         <video id="intro-video" playsinline>
             <source src="ערב_הסעודית.mp4" type="video/mp4">
         </video>
-        <button class="skip-video-btn" onclick="skipVideo()">דלג / Skip</button>
+        <button class="skip-video-btn" id="skip-intro-btn" onclick="skipVideo()">
+            <span id="skip-intro-text">דלג</span>
+        </button>
     </div>
-    
+
     <!-- Stage Transition Video -->
     <div id="stage-video">
         <video id="stage-video-player" playsinline></video>
-        <button class="skip-video-btn" onclick="skipStageVideo()">דלג / Skip</button>
+        <button class="skip-video-btn" id="skip-stage-btn" onclick="skipStageVideo()">
+            <span id="skip-stage-text">דלג</span>
+        </button>
     </div>
     
     <!-- Main Game Container -->

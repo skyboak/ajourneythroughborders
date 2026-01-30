@@ -346,7 +346,7 @@ function checkItemClick(mx, my) {
             handleCorrectItemFound(clickedItem);
         } else {
             console.log('✗ WRONG ITEM');
-            handleWrongItemClick();
+                // handleWrongItemClick();
         }
     } else {
         console.log('✗ No item clicked');
@@ -413,15 +413,15 @@ function handleCorrectItemFound(item) {
 }
 
 function handleWrongItemClick() {
-    const lang = gameState.currentLanguage;
-    const wrongText = GAME_DATA.translations[lang].wrongItem;
-    showBriefMessage(wrongText, 'error');
+    // const lang = gameState.currentLanguage;
+    // const wrongText = GAME_DATA.translations[lang].wrongItem;
+    // showBriefMessage(wrongText, 'error');
     
-    const canvas = document.querySelector('#game-container canvas');
-    if (canvas) {
-        canvas.classList.add('shake');
-        setTimeout(() => canvas.classList.remove('shake'), 500);
-    }
+    // const canvas = document.querySelector('#game-container canvas');
+    // if (canvas) {
+    //     canvas.classList.add('shake');
+    //     setTimeout(() => canvas.classList.remove('shake'), 500);
+    // }
 }
 
 function showBriefMessage(text, type) {
@@ -999,19 +999,100 @@ function updateAuthScreenText() {
     const tabs = document.querySelectorAll('.auth-tab');
     
     const texts = {
-        he: { title: 'התחברות / הרשמה', login: 'התחברות', register: 'הרשמה', guest: 'המשך כאורח' },
-        en: { title: 'Login / Register', login: 'Login', register: 'Register', guest: 'Continue as Guest' },
-        ar: { title: 'تسجيل الدخول / التسجيل', login: 'دخول', register: 'تسجيل', guest: 'المتابعة كضيف' }
+        he: {
+            title: 'התחברות / הרשמה', login: 'התחברות', register: 'הרשמה', guest: 'המשך כאורח', loading: 'מתחבר...', registering: 'נרשם...', fill: 'אנא מלא את כל השדות', mismatch: 'הסיסמאות לא תואמות', passwordShort: 'סיסמה חייבת להיות לפחות 6 תווים', placeholders: { username: 'שם משתמש', email: 'אימייל', password: 'סיסמה', confirm: 'אימות סיסמה' }, unknown: 'שגיאה', errors: {
+                'auth/invalid-email': 'אימייל לא תקין',
+                'auth/user-not-found': 'משתמש לא נמצא',
+                'auth/wrong-password': 'סיסמה שגויה',
+                'auth/email-already-in-use': 'האימייל כבר בשימוש',
+                'auth/weak-password': 'הסיסמה חלשה מדי',
+                'auth/too-many-requests': 'יותר מדי ניסיונות, נסה שוב מאוחר יותר',
+                'auth/invalid-login-credentials': 'פרטי כניסה לא תקינים',
+                'auth/unknown': 'שגיאה לא ידועה'
+            }
+        },
+        en: {
+            title: 'Login / Register', login: 'Login', register: 'Register', guest: 'Continue as Guest', loading: 'Logging in...', registering: 'Registering...', fill: 'Please fill all fields', mismatch: 'Passwords do not match', passwordShort: 'Password must be at least 6 characters', placeholders: { username: 'Username', email: 'Email', password: 'Password', confirm: 'Confirm Password' }, unknown: 'Error', errors: {
+                'auth/invalid-email': 'Invalid email',
+                'auth/user-not-found': 'User not found',
+                'auth/wrong-password': 'Wrong password',
+                'auth/email-already-in-use': 'Email already in use',
+                'auth/weak-password': 'Password too weak',
+                'auth/too-many-requests': 'Too many attempts, try again later',
+                'auth/invalid-login-credentials': 'Invalid login credentials',
+                'auth/unknown': 'Unknown error'
+            }
+        },
+        ar: {
+            title: 'تسجيل الدخول / التسجيل', login: 'دخول', register: 'تسجيل', guest: 'المتابعة كضيف', loading: '...جاري تسجيل الدخول', registering: '...جاري التسجيل', fill: 'يرجى ملء جميع الحقول', mismatch: 'كلمات المرور غير متطابقة', passwordShort: 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل', placeholders: { username: 'اسم المستخدم', email: 'البريد الإلكتروني', password: 'كلمة المرور', confirm: 'تأكيد كلمة المرور' }, unknown: 'خطأ', errors: {
+                'auth/invalid-email': 'البريد الإلكتروني غير صالح',
+                'auth/user-not-found': 'المستخدم غير موجود',
+                'auth/wrong-password': 'كلمة المرور خاطئة',
+                'auth/email-already-in-use': 'البريد الإلكتروني مستخدم بالفعل',
+                'auth/weak-password': 'كلمة المرور ضعيفة جدًا',
+                'auth/too-many-requests': 'المحاولات كثيرة جدا، حاول لاحقًا',
+                'auth/invalid-login-credentials': 'بيانات تسجيل الدخول غير صحيحة',
+                'auth/unknown': 'خطأ غير معروف'
+            }
+        }
     };
-    
+
     const t = texts[lang] || texts.he;
-    
-    if (authTitle) authTitle.textContent = t.title;
+
+    // Title: show active tab label if possible, otherwise a general title
+    if (tabs[0] && tabs[0].classList.contains('active')) {
+        if (authTitle) authTitle.textContent = t.login;
+    } else if (tabs[1] && tabs[1].classList.contains('active')) {
+        if (authTitle) authTitle.textContent = t.register;
+    } else {
+        if (authTitle) authTitle.textContent = t.title;
+    }
     if (tabs[0]) tabs[0].textContent = t.login;
     if (tabs[1]) tabs[1].textContent = t.register;
-    
+
     const skipBtn = document.querySelector('.auth-skip .btn');
     if (skipBtn) skipBtn.textContent = t.guest;
+
+    // Update login and register button text
+    const loginBtn = document.querySelector('#login-form .btn-primary');
+    if (loginBtn) loginBtn.textContent = t.login;
+    const registerBtn = document.querySelector('#register-form .btn-primary');
+    if (registerBtn) registerBtn.textContent = t.register;
+
+    // Update input placeholders (login + register)
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPasswordInput = document.getElementById('login-password');
+    if (loginEmailInput) loginEmailInput.placeholder = t.placeholders.email;
+    if (loginPasswordInput) loginPasswordInput.placeholder = t.placeholders.password;
+
+    const usernameInput = document.getElementById('register-name');
+    const emailInput = document.getElementById('register-email');
+    const passwordInput = document.getElementById('register-password');
+    const confirmInput = document.getElementById('register-confirm');
+    if (usernameInput) usernameInput.placeholder = t.placeholders.username;
+    if (emailInput) emailInput.placeholder = t.placeholders.email;
+    if (passwordInput) passwordInput.placeholder = t.placeholders.password;
+    if (confirmInput) confirmInput.placeholder = t.placeholders.confirm;
+
+    // Update loading and error messages
+    window.getAuthText = function(type) {
+        return t[type] || '';
+    };
+
+    // Translate firebase auth error code to localized message
+    window.translateAuthError = function(code) {
+        const lang = gameState.currentLanguage || 'he';
+        const texts = {
+            he: (t.errors || {}),
+            en: (t.errors || {}),
+            ar: (t.errors || {})
+        };
+        const mapping = (texts[lang] || {});
+        return mapping[code] || mapping['auth/unknown'] || 'Error';
+    };
+
+    // Expose current auth texts so other functions can use them (e.g., for active-tab title)
+    window.currentAuthTexts = t;
 }
 
 window.showLoginForm = function() {
@@ -1020,6 +1101,10 @@ window.showLoginForm = function() {
     document.querySelectorAll('.auth-tab').forEach((tab, i) => {
         tab.classList.toggle('active', i === 0);
     });
+    // Update title to active tab label
+    const t = window.currentAuthTexts || {};
+    const authTitle = document.getElementById('auth-title');
+    if (authTitle && t.login) authTitle.textContent = t.login;
 };
 
 window.showRegisterForm = function() {
@@ -1028,6 +1113,10 @@ window.showRegisterForm = function() {
     document.querySelectorAll('.auth-tab').forEach((tab, i) => {
         tab.classList.toggle('active', i === 1);
     });
+    // Update title to active tab label
+    const t = window.currentAuthTexts || {};
+    const authTitle = document.getElementById('auth-title');
+    if (authTitle && t.register) authTitle.textContent = t.register;
 };
 
 window.handleLogin = async function() {
@@ -1036,11 +1125,11 @@ window.handleLogin = async function() {
     const errorDiv = document.getElementById('login-error');
     
     if (!email || !password) {
-        errorDiv.textContent = 'אנא מלא את כל השדות / Please fill all fields';
+        errorDiv.textContent = window.getAuthText('fill');
         return;
     }
-    
-    errorDiv.textContent = 'מתחבר... / Logging in...';
+
+    errorDiv.textContent = window.getAuthText('loading');
     
     const result = await firebaseLoginUser(email, password);
     
@@ -1059,7 +1148,12 @@ window.handleLogin = async function() {
         
         showSplashScreens();
     } else {
-        errorDiv.textContent = result.error;
+        // Show localized error message if available
+        if (result.errorCode) {
+            errorDiv.textContent = window.translateAuthError(result.errorCode);
+        } else {
+            errorDiv.textContent = result.error || window.getAuthText('unknown');
+        }
     }
 };
 
@@ -1071,21 +1165,20 @@ window.handleRegister = async function() {
     const errorDiv = document.getElementById('register-error');
     
     if (!name || !email || !password || !confirm) {
-        errorDiv.textContent = 'אנא מלא את כל השדות / Please fill all fields';
+        errorDiv.textContent = window.getAuthText('fill');
         return;
     }
-    
+
     if (password !== confirm) {
-        errorDiv.textContent = 'הסיסמאות לא תואמות / Passwords do not match';
+        errorDiv.textContent = window.getAuthText('mismatch');
         return;
     }
     
     if (password.length < 6) {
-        errorDiv.textContent = 'סיסמה חייבת להיות לפחות 6 תווים / Password must be at least 6 characters';
+        errorDiv.textContent = window.getAuthText('passwordShort');
         return;
     }
-    
-    errorDiv.textContent = 'נרשם... / Registering...';
+    errorDiv.textContent = window.getAuthText('registering');
     
     const result = await firebaseRegisterUser(email, password, name);
     
@@ -1094,7 +1187,12 @@ window.handleRegister = async function() {
         hideAuthScreen();
         showSplashScreens();
     } else {
-        errorDiv.textContent = result.error;
+        // Show localized error message if available
+        if (result.errorCode) {
+            errorDiv.textContent = window.translateAuthError(result.errorCode);
+        } else {
+            errorDiv.textContent = result.error || window.getAuthText('unknown');
+        }
     }
 };
 
@@ -1493,13 +1591,13 @@ function showStageCompleteModal() {
     const isLastStage = currentIndex >= stageOrder.length - 1;
     
     const stageCompleteText = lang === 'he' ? 'סיימת את השלב! האם תרצה לשלוח גלויה מעוצבת ממדינה זו?' :
-                               lang === 'ar' ? 'لقد أكملت المرحلة! هل تريد إرسال بطاقة بريدية من هذا البلد؟' :
+                               lang === 'ar' ? 'لقد أكملت المرحلة! هل تريد إرسال בطاقة בريدיה ממדינה זו?' :
                                'You completed the stage! Would you like to send a postcard from this country?';
     
     const gameCompleteText = {
         he: '🎉 סיימת את כל השלבים! האם תרצה לשלוח גלויה לפני שנסיים?',
         en: '🎉 You completed all stages! Would you like to send a postcard before we finish?',
-        ar: '🎉 لقد أكملت جميع المراحل! هل تريد إرسال بطاقة بريدية قبل أن ننتهي؟'
+        ar: '🎉 لقد أكملت جميع المراحل! هل تريد إرسال בطاقة בريدיה قبل أن נنتهي؟'
     };
     
     const finishGameText = {
@@ -1862,7 +1960,16 @@ window.continueGameStart = continueGameStart;
 function showVideoIntro() {
     const videoIntro = document.getElementById('video-intro');
     const video = document.getElementById('intro-video');
-    
+    const skipText = document.getElementById('skip-intro-text');
+    const lang = gameState.currentLanguage || 'he';
+    const translations = {
+        he: 'דלג',
+        en: 'Skip',
+        ar: 'يتخطى'
+    };
+    if (skipText) {
+        skipText.textContent = translations[lang];
+    }
     if (!videoIntro || !video) {
         console.error('Video elements not found');
         if (typeof window.continueGameStart === 'function') {
@@ -1870,15 +1977,12 @@ function showVideoIntro() {
         }
         return;
     }
-    
     // Reset video to start
     video.currentTime = 0;
-    
     // Show video screen first
     videoIntro.style.display = 'flex';
     setTimeout(() => {
         videoIntro.classList.add('active');
-        
         // Only play after screen is visible
         setTimeout(() => {
             video.play().catch(error => {
@@ -1888,7 +1992,6 @@ function showVideoIntro() {
             });
         }, 100);
     }, 50);
-    
     // When video ends, start game
     video.addEventListener('ended', function() {
         skipVideo();
@@ -1924,6 +2027,19 @@ window.showVideoIntro = showVideoIntro;
 // ============================================
 
 function showStageVideo(nextStage) {
+    // Update skip button text for stage video
+    setTimeout(() => {
+        const skipText = document.getElementById('skip-stage-text');
+        const lang = gameState.currentLanguage || 'he';
+        const translations = {
+            he: 'דלג',
+            en: 'Skip',
+            ar: 'يتخطى'
+        };
+        if (skipText) {
+            skipText.textContent = translations[lang];
+        }
+    }, 100);
     console.log('=== showStageVideo called ===');
     console.log('Next stage:', nextStage);
     
