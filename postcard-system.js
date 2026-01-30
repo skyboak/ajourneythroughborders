@@ -217,13 +217,14 @@ async function showPostcardModal() {
     modalBody.innerHTML = `
         <h3>${trans.postcardTitle} ${stage.name[lang]}</h3>
         
-        <div style="margin: 20px 0;">
+        <!-- Recipient Selection First -->
+        <div style="margin: 15px 0;">
             <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--navy);">
                 ${trans.selectRecipient}
             </label>
             
             <!-- Suggested Users -->
-            <div style="margin-bottom: 15px;">
+            <div style="margin-bottom: 12px;">
                 <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">${suggestedLabel[lang]}</div>
                 <div id="suggested-users" style="display: flex; flex-wrap: wrap; gap: 8px;">
                     ${randomUsers.length > 0 ? randomUsers.map(user => `
@@ -283,7 +284,7 @@ async function showPostcardModal() {
             
             <!-- Selected User Display -->
             <div id="selected-user-display" style="
-                margin-top: 15px;
+                margin-top: 10px;
                 padding: 12px;
                 background: var(--cream);
                 border-radius: 10px;
@@ -304,29 +305,62 @@ async function showPostcardModal() {
             <input type="hidden" id="postcard-recipient" value="" />
         </div>
         
-        <div style="margin: 20px 0;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--navy);">
-                ${trans.writeMessage}
-            </label>
-            <textarea 
-                id="postcard-message"
-                placeholder="${trans.messagePlaceholder}"
-                maxlength="500"
-                rows="5"
-                style="
+        <!-- Postcard Preview - Bigger -->
+        <div style="margin: 15px 0; display: flex; justify-content: center;">
+            <div id="postcard-preview" style="
+                position: relative;
+                width: 100%;
+                max-width: 700px;
+            ">
+                <img src="postcard.png" alt="Postcard" style="
                     width: 100%;
-                    padding: 12px;
-                    font-size: 1rem;
-                    border: 2px solid var(--orange);
-                    border-radius: 10px;
-                    font-family: 'Rubik', sans-serif;
-                    resize: vertical;
-                "
-            ></textarea>
-            <div style="text-align: right; font-size: 0.85rem; color: #666; margin-top: 5px;">
-                <span id="char-count">0</span>/500
+                    height: auto;
+                    display: block;
+                    border-radius: 4px;
+                ">
+                <div 
+                    id="postcard-message-editable"
+                    contenteditable="true"
+                    data-placeholder="${trans.messagePlaceholder}"
+                    oninput="handlePostcardInput(this)"
+                    style="
+                        position: absolute;
+                        top: 12%;
+                        left: 5%;
+                        width: 52%;
+                        height: 76%;
+                        font-family: 'Rubik', cursive, sans-serif;
+                        font-size: 1.1rem;
+                        color: #333;
+                        line-height: 1.6;
+                        text-align: center;
+                        word-wrap: break-word;
+                        overflow-y: auto;
+                        padding: 12px;
+                        outline: none;
+                        cursor: text;
+                        background: rgba(237, 237, 237, 0.6);
+                        border: 2px dashed #000000;
+                        border-radius: 8px;
+                        transition: background 0.2s, border-color 0.2s;
+                    "
+                    onfocus="this.style.background='rgba(255, 255, 255, 0.8)'; this.style.borderColor='#333333'"
+                    onblur="this.style.background='rgba(237, 237, 237, 0.6)'; this.style.borderColor='#000000'"
+                ></div>
+                <div style="
+                    position: absolute;
+                    bottom: 5px;
+                    left: 5%;
+                    font-size: 0.8rem;
+                    color: #666;
+                    background: rgba(255,255,255,0.8);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                "><span id="char-count">0</span>/200</div>
             </div>
         </div>
+        
+        <input type="hidden" id="postcard-message" value="" />
         
         <div id="postcard-error" style="color: var(--error); text-align: center; min-height: 20px; font-size: 0.9rem; margin-bottom: 10px;"></div>
         
@@ -441,6 +475,49 @@ window.searchUsers = function(query) {
     resultsDiv.style.background = 'white';
     resultsDiv.style.border = '1px solid #ddd';
     resultsDiv.style.borderRadius = '8px';
+};
+
+// Handle postcard direct input
+window.handlePostcardInput = function(element) {
+    const text = element.innerText || '';
+    const charCount = document.getElementById('char-count');
+    const hiddenInput = document.getElementById('postcard-message');
+    
+    // Limit to 200 characters
+    if (text.length > 200) {
+        element.innerText = text.substring(0, 200);
+        // Move cursor to end
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(element);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+    
+    const currentLength = Math.min(text.length, 200);
+    
+    if (charCount) {
+        charCount.textContent = currentLength;
+    }
+    
+    if (hiddenInput) {
+        hiddenInput.value = text.substring(0, 200);
+    }
+};
+
+// Update postcard preview with message (legacy support)
+window.updatePostcardPreview = function(message) {
+    const previewDiv = document.getElementById('postcard-message-preview');
+    const charCount = document.getElementById('char-count');
+    
+    if (previewDiv) {
+        previewDiv.textContent = message;
+    }
+    
+    if (charCount) {
+        charCount.textContent = message.length;
+    }
 };
 
 // Select a user from search results

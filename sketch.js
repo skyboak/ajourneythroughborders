@@ -84,7 +84,10 @@ function drawCountryTitle() {
     if (!stage || !stage.name) return;
     
     const lang = gameState.currentLanguage || 'he';
-    const countryName = stage.name[lang] || stage.name['he'];
+    let countryName = stage.name[lang] || stage.name['he'];
+    
+    // Convert to uppercase
+    countryName = countryName.toUpperCase();
     
     // Determine text direction
     const isRTL = (lang === 'he' || lang === 'ar');
@@ -96,24 +99,25 @@ function drawCountryTitle() {
     const titleX = width / 2;
     const titleY = 50;
     
-    // Draw semi-transparent background
+    // Set text properties first
     textSize(32);
     textFont('Arial');
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    
     const textW = textWidth(countryName);
     const paddingX = 30;
-    const paddingY = 12;
+    const boxHeight = 50;
     
     // Background rounded rectangle
     fill(0, 0, 0, 150);
     noStroke();
     rectMode(CENTER);
-    rect(titleX, titleY, textW + paddingX * 2, 50, 15);
+    rect(titleX, titleY, textW + paddingX * 2, boxHeight, 15);
     
-    // Draw text
+    // Draw text - offset slightly to account for font baseline
     fill(255, 215, 0); // Gold color
-    textAlign(CENTER, CENTER);
-    textStyle(BOLD);
-    text(countryName, titleX, titleY);
+    text(countryName, titleX, titleY + 2);
     
     pop();
 }
@@ -350,6 +354,12 @@ function checkItemClick(mx, my) {
 }
 
 function handleCorrectItemFound(item) {
+    // Play correct sound effect
+    if (gameState.soundEnabled) {
+        const correctSound = new Audio('correct.mp3');
+        correctSound.play().catch(err => console.log('Could not play correct sound:', err));
+    }
+    
     // Stop the timer
     stopItemTimer();
     
@@ -1197,6 +1207,13 @@ async function startGame() {
     console.log('Current stage:', gameState.currentStage);
     console.log('Looking for item:', gameState.currentSearchItem);
     
+    // Show tutorial on first stage
+    if (gameState.currentStage === 'saudi' && !gameState.tutorialShown) {
+        setTimeout(() => {
+            showGameTutorial();
+        }, 500);
+    }
+    
     // Update postcard badge after a short delay to ensure everything is ready
     setTimeout(() => {
         if (typeof window.updatePostcardBadge === 'function') {
@@ -1204,6 +1221,193 @@ async function startGame() {
             window.updatePostcardBadge();
         }
     }, 1500);
+}
+
+// ============================================
+// TUTORIAL SYSTEM
+// ============================================
+
+function showGameTutorial() {
+    const lang = gameState.currentLanguage || 'he';
+    
+    const tutorialSteps = {
+        he: [
+            {
+                title: 'הסבר קטן לפני שמתחילים!',
+                text: '',
+                highlight: null,
+                continueBtn: 'המשך',
+                skipBtn: 'דלג'
+            },
+            {
+                title: '',
+                text: 'מצא את הציור שמופיע בעיגול במפה. כל פעם שתמצא - תרוויח נקודות!',
+                highlight: 'search-item-container',
+                arrow: 'right',
+                continueBtn: 'המשך',
+                skipBtn: 'דלג'
+            },
+            {
+                title: '',
+                text: 'זהו כפתור העזרה! צריך עזרה? לחץ עליי ואראה לך איפה הציור מסתתר. אבל שים לב - כל לחיצה עולה 30 נקודות!',
+                highlight: 'hint-button',
+                arrow: 'right',
+                continueBtn: 'המשך למשחק',
+                skipBtn: null
+            }
+        ],
+        en: [
+            {
+                title: 'A quick explanation before we start!',
+                text: '',
+                highlight: null,
+                continueBtn: 'Continue',
+                skipBtn: 'Skip'
+            },
+            {
+                title: '',
+                text: "Find the drawing that appears in the circle on the map. Every time you find it - you'll earn points!",
+                highlight: 'search-item-container',
+                arrow: 'right',
+                continueBtn: 'Continue',
+                skipBtn: 'Skip'
+            },
+            {
+                title: '',
+                text: "This is the help button! Need help? Press me and I'll show you where the drawing is hiding. But be careful - each press costs 30 points!",
+                highlight: 'hint-button',
+                arrow: 'right',
+                continueBtn: 'Continue to game',
+                skipBtn: null
+            }
+        ],
+        ar: [
+            {
+                title: 'شرح قصير قبل ما نبدأ!',
+                text: '',
+                highlight: null,
+                continueBtn: 'استمر',
+                skipBtn: 'تخطى'
+            },
+            {
+                title: '',
+                text: 'لاقي الرسمة اللي تظهر في الدائرة بالخريطة. كل ما تلاقيها - راح تكسب نقاط!',
+                highlight: 'search-item-container',
+                arrow: 'right',
+                continueBtn: 'استمر',
+                skipBtn: 'تخطى'
+            },
+            {
+                title: '',
+                text: 'هذا زر المساعدة! محتاج مساعدة؟ اضغط عليّ وراح أوريك وين الرسمة مستخبية. بس انتبه - كل ضغطة بتكلفك 30 نقطة!',
+                highlight: 'hint-button',
+                arrow: 'right',
+                continueBtn: 'استمر للعبة',
+                skipBtn: null
+            }
+        ]
+    };
+    
+    const steps = tutorialSteps[lang] || tutorialSteps['he'];
+    let currentStep = 0;
+    
+    // Create tutorial overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'tutorial-overlay';
+    overlay.innerHTML = `
+        <div id="tutorial-highlight"></div>
+        <div id="tutorial-arrow">➜</div>
+        <div id="tutorial-box">
+            <h3 id="tutorial-title"></h3>
+            <p id="tutorial-text"></p>
+            <div id="tutorial-buttons"></div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    
+    function showStep(stepIndex) {
+        const step = steps[stepIndex];
+        const titleEl = document.getElementById('tutorial-title');
+        const textEl = document.getElementById('tutorial-text');
+        const buttonsEl = document.getElementById('tutorial-buttons');
+        const highlightEl = document.getElementById('tutorial-highlight');
+        const arrowEl = document.getElementById('tutorial-arrow');
+        const boxEl = document.getElementById('tutorial-box');
+        
+        titleEl.textContent = step.title;
+        textEl.textContent = step.text;
+        
+        // Buttons
+        let buttonsHtml = '';
+        if (step.skipBtn) {
+            buttonsHtml += `<button class="btn btn-secondary" onclick="skipTutorial()">${step.skipBtn}</button>`;
+        }
+        buttonsHtml += `<button class="btn btn-primary" onclick="nextTutorialStep()">${step.continueBtn}</button>`;
+        buttonsEl.innerHTML = buttonsHtml;
+        
+        // Highlight element
+        if (step.highlight) {
+            const targetEl = document.getElementById(step.highlight);
+            if (targetEl) {
+                const rect = targetEl.getBoundingClientRect();
+                highlightEl.style.display = 'block';
+                highlightEl.style.top = (rect.top - 10) + 'px';
+                highlightEl.style.left = (rect.left - 10) + 'px';
+                highlightEl.style.width = (rect.width + 20) + 'px';
+                highlightEl.style.height = (rect.height + 20) + 'px';
+                
+                // Position arrow
+                arrowEl.style.display = 'block';
+                arrowEl.style.top = (rect.top + rect.height / 2 - 20) + 'px';
+                arrowEl.style.left = (rect.right + 20) + 'px';
+                
+                // Position tutorial box
+                boxEl.style.top = (rect.top + rect.height / 2 - 60) + 'px';
+                boxEl.style.left = (rect.right + 80) + 'px';
+                boxEl.style.right = 'auto';
+                boxEl.style.transform = 'none';
+                
+                // Adjust if too far right
+                if (rect.right + 400 > window.innerWidth) {
+                    boxEl.style.left = '50%';
+                    boxEl.style.top = (rect.bottom + 60) + 'px';
+                    boxEl.style.transform = 'translateX(-50%)';
+                    arrowEl.style.transform = 'rotate(90deg)';
+                    arrowEl.style.top = (rect.bottom + 15) + 'px';
+                    arrowEl.style.left = (rect.left + rect.width / 2 - 20) + 'px';
+                }
+            }
+        } else {
+            highlightEl.style.display = 'none';
+            arrowEl.style.display = 'none';
+            boxEl.style.top = '50%';
+            boxEl.style.left = '50%';
+            boxEl.style.transform = 'translate(-50%, -50%)';
+        }
+    }
+    
+    window.nextTutorialStep = function() {
+        currentStep++;
+        if (currentStep >= steps.length) {
+            closeTutorial();
+        } else {
+            showStep(currentStep);
+        }
+    };
+    
+    window.skipTutorial = function() {
+        closeTutorial();
+    };
+    
+    function closeTutorial() {
+        gameState.tutorialShown = true;
+        const overlay = document.getElementById('tutorial-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
+    
+    showStep(0);
 }
 
 // Continue starting the game after user registration
