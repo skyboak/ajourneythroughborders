@@ -201,6 +201,24 @@
             transform: scale(1.1);
         }
         
+        .circular-button:hover .button-icon {
+            filter: invert(1);
+        }
+        
+        .button-icon {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            transition: filter 0.3s ease;
+        }
+        
+        .score-icon-img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            margin-right: 5px;
+        }
+        
         #sound-toggle {
             bottom: 20px;
             left: 20px;
@@ -360,6 +378,10 @@
             background: #000000;
             color: #ededed;
             transform: scale(1.15);
+        }
+        
+        #hint-button:hover .button-icon {
+            filter: invert(1);
         }
         
         #hint-button:disabled {
@@ -844,6 +866,26 @@
             color: var(--navy);
         }
         
+        .profile-nav-btn:hover .nav-icon,
+        .profile-nav-btn.active .nav-icon {
+            filter: none;
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 6px;
+            filter: invert(1);
+        }
+        
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        
         .nav-badge {
             position: absolute;
             top: -8px;
@@ -987,6 +1029,13 @@
             font-size: 1.3rem;
         }
         
+        .setting-icon-img {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        
         .setting-select {
             padding: 10px 15px;
             border: 2px solid var(--teal);
@@ -1126,6 +1175,13 @@
         .empty-icon {
             font-size: 4rem;
             margin-bottom: 20px;
+        }
+        
+        .empty-icon-img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
         }
         
         .empty-state p {
@@ -1526,13 +1582,15 @@
     <div id="game-container"></div>
     
     <!-- UI Buttons -->
-    <button id="sound-toggle" class="circular-button" title="Toggle Sound">♪</button>
+    <button id="sound-toggle" class="circular-button" title="Toggle Sound">
+        <img src="icons/מוזיקה פועלת.png" alt="Music" class="button-icon" id="sound-icon">
+    </button>
     <button id="profile-button" class="circular-button" title="Profile">👤</button>
     <span id="profile-notification-badge"></span>
     
     <!-- Score Display -->
     <div id="score-display">
-        <span id="score-icon">⭐</span>
+        <img src="icons/כוכב של ניקוד.png" alt="Score" class="score-icon-img" id="score-icon">
         <span id="score-value">0</span>
     </div>
     
@@ -1547,7 +1605,7 @@
         </div>
         <div id="timer-text">2:00</div>
         <button id="hint-button" title="Get Hint (-30 pts)">
-            💡
+            <img src="icons/עזרה.png" alt="Hint" class="button-icon">
             <span class="hint-cost">-30</span>
         </button>
     </div>

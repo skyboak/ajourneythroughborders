@@ -266,19 +266,19 @@ async function showProfileOverview() {
                 <button class="back-to-game-btn" onclick="closeProfilePage()">
                     ← ${t.backToGame}
                 </button>
-                <h1>${t.title}</h1>
+                <h1 style="text-align:center; width:100%;">${t.title}</h1>
             </div>
             
             <!-- Profile Navigation -->
             <div class="profile-nav">
                 <button class="profile-nav-btn active" onclick="showProfileOverview()">
-                    📊 ${t.overview}
+                    <img src="icons/סקירה.png" alt="" class="nav-icon"> ${t.overview}
                 </button>
                 <button class="profile-nav-btn" onclick="showProfileSettings()">
-                    ⚙️ ${t.settings}
+                    <img src="icons/הגדרות.png" alt="" class="nav-icon"> ${t.settings}
                 </button>
                 <button class="profile-nav-btn" onclick="showMyPostcards()">
-                    ✉️ ${t.postcards}
+                    <img src="icons/גלויה.png" alt="" class="nav-icon"> ${t.postcards}
                     ${unreadCount > 0 ? `<span class="nav-badge">${unreadCount}</span>` : ''}
                 </button>
             </div>
@@ -294,41 +294,9 @@ async function showProfileOverview() {
                     <p class="user-subtitle">${t.userName}</p>
                 </div>
                 
-                <!-- Progress Card -->
-                <div class="profile-card">
-                    <h3>📊 ${t.progress}</h3>
-                    
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width: ${progressPercent}%">
-                            ${progressPercent}%
-                        </div>
-                    </div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-label">${t.completed}</div>
-                            <div class="stat-value">${completedStages.length}/${stageOrder.length}</div>
-                            <div class="stat-subtitle">${t.stages}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">${t.currentStage}</div>
-                            <div class="stat-value">${stageName}</div>
-                        </div>
-                    </div>
-                    
-                    ${progress ? `
-                        <div class="stat-item">
-                            <div class="stat-label">${t.itemsFound}</div>
-                            <div class="stat-value">
-                                ${progress.foundItems.length}/${GAME_DATA.stages[progress.currentStage]?.items.length || 0}
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-                
                 <!-- Postcards Card -->
                 <div class="profile-card">
-                    <h3>✉️ ${t.postcards}</h3>
+                    <h3><img src="icons/גלויה.png" alt="" class="card-icon"> ${t.postcards}</h3>
                     
                     <div class="stats-grid">
                         <div class="stat-item">
@@ -439,13 +407,13 @@ async function showProfileSettings() {
             <!-- Profile Navigation -->
             <div class="profile-nav">
                 <button class="profile-nav-btn" onclick="showProfileOverview()">
-                    📊 ${t.overview}
+                    <img src="icons/סקירה.png" alt="" class="nav-icon"> ${t.overview}
                 </button>
                 <button class="profile-nav-btn active" onclick="showProfileSettings()">
-                    ⚙️ ${t.settings}
+                    <img src="icons/הגדרות.png" alt="" class="nav-icon"> ${t.settings}
                 </button>
                 <button class="profile-nav-btn" onclick="showMyPostcards()">
-                    ✉️ ${t.postcards}
+                    <img src="icons/גלויה.png" alt="" class="nav-icon"> ${t.postcards}
                     ${unreadCount > 0 ? `<span class="nav-badge">${unreadCount}</span>` : ''}
                 </button>
             </div>
@@ -453,12 +421,12 @@ async function showProfileSettings() {
             <!-- Settings Content -->
             <div class="profile-content">
                 <div class="profile-card">
-                    <h3>⚙️ ${t.settings}</h3>
+                    <h3><img src="icons/הגדרות.png" alt="" class="card-icon"> ${t.settings}</h3>
                     
                     <!-- Language Setting -->
                     <div class="setting-item">
                         <label class="setting-label">
-                            <span class="setting-icon">🌐</span>
+                            <img src="icons/שפה.png" alt="" class="setting-icon-img">
                             <span>${t.language}</span>
                         </label>
                         <select id="profile-language" class="setting-select">
@@ -471,7 +439,7 @@ async function showProfileSettings() {
                     <!-- Sound Setting -->
                     <div class="setting-item">
                         <label class="setting-label">
-                            <span class="setting-icon">🔊</span>
+                            <img src="icons/צלילים.png" alt="" class="setting-icon-img">
                             <span>${t.sound}</span>
                         </label>
                         <label class="toggle-switch">
@@ -622,7 +590,10 @@ window.saveProfileSettings = async function() {
     gameState.soundEnabled = sound;
     const soundToggle = document.getElementById('sound-toggle');
     if (soundToggle) {
-        soundToggle.textContent = sound ? '♪' : '🔇';
+        const soundIcon = document.getElementById('sound-icon');
+        if (soundIcon) {
+            soundIcon.src = sound ? 'icons/מוזיקה פועלת.png' : 'icons/כיבוי מוזיקה.png';
+        }
     }
     
     // Show success message
@@ -794,7 +765,7 @@ function setupProfileButton() {
     profileBtn.parentNode.replaceChild(newProfileBtn, profileBtn);
     
     // Set profile icon and title
-    newProfileBtn.innerHTML = '👤';
+    newProfileBtn.innerHTML = '<img src="icons/גלויה.png" alt="Profile" class="button-icon">';
     newProfileBtn.title = 'הפרופיל שלי / My Profile / ملفي الشخصي';
     
     // Add click event to open profile - with force
@@ -867,7 +838,10 @@ window.continueGameStart = async function() {
             gameState.soundEnabled = settings.soundEnabled;
             const soundToggle = document.getElementById('sound-toggle');
             if (soundToggle) {
-                soundToggle.textContent = settings.soundEnabled ? '♪' : '🔇';
+                const soundIcon = document.getElementById('sound-icon');
+                if (soundIcon) {
+                    soundIcon.src = settings.soundEnabled ? 'icons/מוזיקה פועלת.png' : 'icons/כיבוי מוזיקה.png';
+                }
             }
         }
     }
@@ -1003,7 +977,7 @@ window.showProfilePostcards = async function() {
     if (postcards.length === 0) {
         postcardsHTML = `
             <div class="empty-state">
-                <div class="empty-icon">✉️</div>
+                <img src="icons/גלויה.png" alt="" class="empty-icon-img">
                 <p>${t.noPostcards}</p>
             </div>
         `;
@@ -1041,13 +1015,13 @@ window.showProfilePostcards = async function() {
             <!-- Profile Navigation -->
             <div class="profile-nav">
                 <button class="profile-nav-btn" onclick="showProfileOverview()">
-                    📊 ${t.overview}
+                    <img src="icons/סקירה.png" alt="" class="nav-icon"> ${t.overview}
                 </button>
                 <button class="profile-nav-btn" onclick="showProfileSettings()">
-                    ⚙️ ${t.settings}
+                    <img src="icons/הגדרות.png" alt="" class="nav-icon"> ${t.settings}
                 </button>
                 <button class="profile-nav-btn active" onclick="showProfilePostcards()">
-                    ✉️ ${t.postcards}
+                    <img src="icons/גלויה.png" alt="" class="nav-icon"> ${t.postcards}
                     ${unreadCount > 0 ? `<span class="nav-badge">${unreadCount}</span>` : ''}
                 </button>
             </div>

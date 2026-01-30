@@ -494,11 +494,21 @@ const GAME_DATA = {
             from: 'מאת',
             back: 'חזור',
             reply: 'השב',
+            stageArrival: {
+                title: 'כל הכבוד! הגעת לשלב',
+                start: 'התחל',
+                countries: {
+                    saudi: 'ערב הסעודית',
+                    jordan: 'ירדן',
+                    israel: 'ישראל',
+                    syria: 'סוריה'
+                }
+            },
             splash: {
                 welcome: {
-                    title: 'ברוכים הבאים למסע ברכבת החיג\'אז!',
-                    text: 'ברכבת החיג\'אז נסעו פעם אלפי עולי רגל ממדינות ערב דרומה למכה. הרכבת עברה דרך ארבע מדינות: סעודיה, ירדן, ישראל וסוריה. במשחק הזה תגלו את התרבות והמסורות של כל מדינה!',
-                    button: 'המשך'
+                    title: 'על רכבת החיג\'אז',
+                    text: 'הרכבת החיג\'אזית הייתה רכבת היסטורית שעברה בין ערב הסעודית, ירדן, ישראל וסוריה. היא פעלה בין השנים 1908-1918 בתקופת האימפריה העות\'מאנית ושימשה לתחבורה והובלה במשך עשרות שנים והייתה חלק חשוב מההיסטוריה של האזור. הרכבת אפשרה דו-קיום באזור בין כל התושבים, וכולם נעו בחופשיות ממקום למקום. חשוב לדעת: בתקופה שהרכבת פעלה, כל האזור היה חלק מאימפריה אחת ולא היו הגבולות והמדינות שאנחנו מכירים היום. המשחק שלנו מבוסס על קו הרכבת ההיסטורי, אבל משקף את המציאות של ימינו - עם המדינות והגבולות המודרניים שקיימים כיום.',
+                    button: 'יאללה למשחק!'
                 },
                 howToPlay: {
                     title: 'איך משחקים?',
@@ -549,11 +559,21 @@ const GAME_DATA = {
             from: 'From',
             back: 'Back',
             reply: 'Reply',
+            stageArrival: {
+                title: 'Congratulations! You\'ve reached Stage',
+                start: 'Start',
+                countries: {
+                    saudi: 'Saudi Arabia',
+                    jordan: 'Jordan',
+                    israel: 'Israel',
+                    syria: 'Syria'
+                }
+            },
             splash: {
                 welcome: {
-                    title: 'Welcome to the Hejaz Railway Journey!',
-                    text: 'The Hejaz Railway once carried thousands of pilgrims from Arab countries south to Mecca. The railway passed through four countries: Saudi Arabia, Jordan, Israel, and Syria. In this game, you will discover the culture and traditions of each country!',
-                    button: 'Continue'
+                    title: 'The Hejaz Railway',
+                    text: 'The Hejaz Railway was a historic railway that passed through Saudi Arabia, Jordan, Israel, and Syria. It operated between 1908-1918 during the Ottoman Empire period and served for transportation and shipping for decades, playing an important part of the region\'s history. The railway enabled coexistence in the region among all residents, and everyone moved freely from place to place. Important note: During the time the railway operated, the entire area was part of one empire and the borders and countries we know today did not exist. Our game is based on the historic railway route, but reflects today\'s reality - with the modern countries and borders that exist now.',
+                    button: 'Let\'s Play!'
                 },
                 howToPlay: {
                     title: 'How to Play?',
@@ -604,11 +624,21 @@ const GAME_DATA = {
             from: 'من',
             back: 'رجوع',
             reply: 'رد',
+            stageArrival: {
+                title: 'مبروك! وصلت للمرحلة',
+                start: 'ابدأ',
+                countries: {
+                    saudi: 'السعودية',
+                    jordan: 'الأردن',
+                    israel: 'إسرائيل',
+                    syria: 'سوريا'
+                }
+            },
             splash: {
                 welcome: {
-                    title: 'مرحباً بكم في رحلة سكة حديد الحجاز!',
-                    text: 'كانت سكة حديد الحجاز تنقل آلاف الحجاج من الدول العربية جنوباً إلى مكة. مرت السكة الحديدية عبر أربع دول: المملكة العربية السعودية والأردن وإسرائيل وسوريا. في هذه اللعبة، ستكتشف ثقافة وتقاليد كل بلد!',
-                    button: 'متابعة'
+                    title: 'سكة حديد الحجاز',
+                    text: 'كانت سكة حديد الحجاز خط سكة حديد تاريخي مر عبر المملكة العربية السعودية والأردن وإسرائيل وسوريا. عملت بين عامي 1908-1918 خلال فترة الإمبراطورية العثمانية واستُخدمت للنقل والشحن لعدة عقود وكانت جزءاً مهماً من تاريخ المنطقة. أتاحت السكة الحديدية التعايش في المنطقة بين جميع السكان، وتنقل الجميع بحرية من مكان إلى آخر. من المهم أن نعرف: في الفترة التي عملت فيها السكة الحديدية، كانت المنطقة بأكملها جزءاً من إمبراطورية واحدة ولم تكن هناك الحدود والدول التي نعرفها اليوم. لعبتنا مبنية على خط السكة الحديدية التاريخي، لكنها تعكس واقع اليوم - مع الدول والحدود الحديثة الموجودة حالياً.',
+                    button: 'يلا نلعب!'
                 },
                 howToPlay: {
                     title: 'كيف تلعب؟',
@@ -646,7 +676,45 @@ const gameState = {
     showingItemInfo: false
 };
 
-// Stage videos mapping
+// Stage transition videos mapping - language dependent
+// These are the transition cutaways between stages
+function getStageTransitionVideo(stageNumber, lang) {
+    const basePath = 'מעברים/';
+    const langFolder = {
+        'he': 'עברית/',
+        'en': 'אנגלית/',
+        'ar': 'ערבית/'
+    };
+    
+    const videoFiles = {
+        'he': {
+            1: 'מעבר שלב עברית -_1.mp4',
+            2: 'מעבר שלב עברית -_2.mp4',
+            3: 'מעבר שלב עברית -_3.mp4',
+            4: 'מעבר שלב עברית -_4.mp4'
+        },
+        'en': {
+            1: 'מעבר שלב אנגלית1 -.mp4',
+            2: 'מעבר שלב אנגלית2 -.mp4',
+            3: 'מעבר שלב אנגלית3 -.mp4',
+            4: 'מעבר שלב אנגלית4 -.mp4'
+        },
+        'ar': {
+            1: 'מעבר שלب ערבית1 -.mp4',
+            2: 'מעבר שלב ערבית -_2.mp4',
+            3: 'מעבר שלב ערבית -3.mp4',
+            4: 'מעבר שלב ערבית -_4.mp4'
+        }
+    };
+    
+    const folder = langFolder[lang] || langFolder['he'];
+    const files = videoFiles[lang] || videoFiles['he'];
+    const file = files[stageNumber];
+    
+    return basePath + folder + file;
+}
+
+// Stage intro videos (when entering a stage for the first time)
 const STAGE_VIDEOS = {
     'saudi': 'ערב_הסעודית.mp4',
     'jordan': 'ירדן.mp4',
@@ -657,5 +725,6 @@ const STAGE_VIDEOS = {
 // Make globally accessible
 window.gameState = gameState;
 window.STAGE_VIDEOS = STAGE_VIDEOS;
+window.getStageTransitionVideo = getStageTransitionVideo;
 
 console.log('✅ Game data and state initialized with correct music file names');

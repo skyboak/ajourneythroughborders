@@ -193,13 +193,13 @@ function updateZoomIndicator() {
 }
 
 function keyPressed() {
-    // Don't capture keyboard when typing in an input field
+    // Don't capture keyboard when typing in an input field or contenteditable
     const activeElement = document.activeElement;
-    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.getAttribute('contenteditable') === 'true')) {
         return true; // Let the browser handle the event
     }
     
-    if (key === 'd' || key === 'D') {
+    if (key === 'd' || key === 'D' || keyCode === 68) {
         debugMode = !debugMode;
         console.log('Debug mode:', debugMode ? 'ON' : 'OFF');
     }
@@ -862,7 +862,10 @@ function setupCircularButtons() {
     if (soundToggle) {
         soundToggle.addEventListener('click', () => {
             gameState.soundEnabled = !gameState.soundEnabled;
-            soundToggle.textContent = gameState.soundEnabled ? '♪' : '🔇';
+            const soundIcon = document.getElementById('sound-icon');
+            if (soundIcon) {
+                soundIcon.src = gameState.soundEnabled ? 'icons/מוזיקה פועלת.png' : 'icons/כיבוי מוזיקה.png';
+            }
             
             // Toggle background music
             if (typeof toggleBackgroundMusic === 'function') {
@@ -1185,7 +1188,6 @@ function showSplashScreens() {
 async function startGame() {
     // Skip user registration for now - just start the game
     console.log('Starting game directly...');
-    gameStarted = true;
     
     // Initialize game state if not already done
     if (!gameState.currentLanguage) {
@@ -1198,6 +1200,14 @@ async function startGame() {
         gameState.currentSearchItem = 0;
         gameState.foundItems = [];
     }
+    
+    // Show the first stage video before starting the game
+    // gameStarted is set to true in continueToStage after video ends
+    showStageVideo('saudi');
+}
+
+function actuallyStartGame() {
+    gameStarted = true;
     
     // Show game elements
     setupCircularButtons();
@@ -1587,27 +1597,35 @@ function showGameCompleteModal() {
     
     const finalScore = currentScore;
     
+    const instagramUrl = 'https://www.instagram.com/a_journey_beyond_borders?igsh=MWthaWpiN280aDN2dQ%3D%3D&utm_source=qr';
+    
     const text = {
         he: {
             title: '🎉 סיימת את המשחק!',
             scoreLabel: 'הניקוד הסופי שלך:',
             saving: 'שומר לטבלת השיאים...',
             viewLeaderboard: 'צפה בטבלת השיאים',
-            playAgain: 'שחק שוב'
+            playAgain: 'שחק שוב',
+            followUs: 'רוצים לגלות עוד? עקבו אחרינו!',
+            followButton: 'עקבו באינסטגרם'
         },
         en: {
             title: '🎉 Game Complete!',
             scoreLabel: 'Your final score:',
             saving: 'Saving to leaderboard...',
             viewLeaderboard: 'View Leaderboard',
-            playAgain: 'Play Again'
+            playAgain: 'Play Again',
+            followUs: 'Want to discover more? Follow us!',
+            followButton: 'Follow on Instagram'
         },
         ar: {
             title: '🎉 أكملت اللعبة!',
             scoreLabel: 'نتيجتك النهائية:',
             saving: 'حفظ في لوحة المتصدرين...',
             viewLeaderboard: 'عرض لوحة المتصدرين',
-            playAgain: 'العب مرة أخرى'
+            playAgain: 'العب مرة أخرى',
+            followUs: 'حابين تكتشفوا أكثر؟ تابعونا!',
+            followButton: 'تابعونا على انستغرام'
         }
     };
     
@@ -1620,7 +1638,22 @@ function showGameCompleteModal() {
                 ⭐ ${finalScore}
             </div>
             <p style="margin-bottom: 20px;">${t.scoreLabel}</p>
-            <p id="saving-status" style="color: #666; font-size: 0.9rem;">${t.saving}</p>
+            
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #ccc;">
+                <p style="margin-bottom: 15px; font-weight: bold;">${t.followUs}</p>
+                <a href="${instagramUrl}" target="_blank" style="
+                    display: inline-block;
+                    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+                    color: #ffffff;
+                    padding: 12px 30px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    border-radius: 25px;
+                    text-decoration: none;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
+                ">${t.followButton}</a>
+            </div>
         </div>
         <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
             <button class="btn btn-primary" onclick="showLeaderboard()">${t.viewLeaderboard}</button>
@@ -1894,9 +1927,15 @@ function showStageVideo(nextStage) {
     console.log('=== showStageVideo called ===');
     console.log('Next stage:', nextStage);
     
-    // Check if this stage has a video
-    const videoFile = STAGE_VIDEOS[nextStage];
-    console.log('Video file for', nextStage, ':', videoFile);
+    // Get the stage transition number based on the NEXT stage (video plays before entering the stage)
+    const stageOrder = ['saudi', 'jordan', 'israel', 'syria'];
+    const nextIndex = stageOrder.indexOf(nextStage);
+    const transitionNumber = nextIndex + 1; // 1 for saudi, 2 for jordan, 3 for israel, 4 for syria
+    
+    // Get language-dependent transition video
+    const lang = gameState.currentLanguage || 'he';
+    const videoFile = getStageTransitionVideo(transitionNumber, lang);
+    console.log('Transition video for stage', transitionNumber, 'language', lang, ':', videoFile);
     
     if (!videoFile) {
         // No video for this stage, continue directly
@@ -1985,18 +2024,113 @@ window.skipStageVideo = function() {
     console.log('📍 pendingStage:', nextStage);
     console.log('📍 Current gameState.currentStage:', gameState.currentStage);
     
-    // Hide and continue to next stage after fade
+    // Hide and show stage arrival modal
     setTimeout(() => {
         stageVideoDiv.style.display = 'none';
         if (nextStage) {
-            console.log('➡️ Calling continueToStage with:', nextStage);
-            continueToStage(nextStage);
-            window.pendingStage = null;
+            console.log('➡️ Showing stage arrival modal for:', nextStage);
+            showStageArrivalModal(nextStage);
         } else {
             console.error('❌ No pendingStage found!');
         }
     }, 500);
 };
+
+// ============================================
+// STAGE ARRIVAL MODAL
+// ============================================
+
+function showStageArrivalModal(stage) {
+    const lang = gameState.currentLanguage || 'he';
+    const t = GAME_DATA.translations[lang].stageArrival;
+    const stageOrder = ['saudi', 'jordan', 'israel', 'syria'];
+    const stageNumber = String(stageOrder.indexOf(stage) + 1).padStart(2, '0');
+    const countryName = t.countries[stage];
+    const isRTL = lang === 'he' || lang === 'ar';
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('stage-arrival-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    const modal = document.createElement('div');
+    modal.id = 'stage-arrival-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: #ededed;
+            border-radius: 20px;
+            padding: 50px 60px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 2px solid #000000;
+            max-width: 500px;
+            direction: ${isRTL ? 'rtl' : 'ltr'};
+        ">
+            <h1 style="
+                color: #000000;
+                font-size: 28px;
+                margin: 0 0 10px 0;
+                font-weight: bold;
+            ">${t.title} ${stageNumber}</h1>
+            <h2 style="
+                color: #000000;
+                font-size: 36px;
+                margin: 0 0 40px 0;
+                font-weight: bold;
+            ">${countryName}</h2>
+            <button id="stage-arrival-start-btn" style="
+                background: #000000;
+                color: #ffffff;
+                border: none;
+                padding: 15px 60px;
+                font-size: 20px;
+                font-weight: bold;
+                border-radius: 30px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            ">${t.start}</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add hover effect
+    const btn = document.getElementById('stage-arrival-start-btn');
+    btn.addEventListener('mouseenter', () => {
+        btn.style.transform = 'scale(1.05)';
+        btn.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+    });
+    btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'scale(1)';
+        btn.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+    });
+    
+    // Handle start button click
+    btn.addEventListener('click', () => {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            modal.remove();
+            window.pendingStage = null;
+            continueToStage(stage);
+        }, 300);
+    });
+}
 
 // ============================================
 // PASSPORT VIDEO - Shows at end of game
@@ -2070,6 +2204,13 @@ function continueToStage(nextStage) {
     console.log('=== continueToStage called ===');
     console.log('Current stage:', gameState.currentStage);
     console.log('Next stage:', nextStage);
+    
+    // If this is the first stage (saudi), call actuallyStartGame to initialize the game
+    if (nextStage === 'saudi' && !gameStarted) {
+        gameState.currentStage = nextStage;
+        actuallyStartGame();
+        return;
+    }
     
     // Update game state
     gameState.currentStage = nextStage;
