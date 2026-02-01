@@ -42,7 +42,7 @@ function initializeFirebase() {
 // ============================================
 
 // Register new user with email and password
-async function firebaseRegisterUser(email, password, displayName) {
+async function firebaseRegisterUser(email, password, displayName, country = 'IL') {
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
@@ -54,6 +54,7 @@ async function firebaseRegisterUser(email, password, displayName) {
         await db.collection('users').doc(user.uid).set({
             displayName: displayName,
             email: email,
+            country: country,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -62,7 +63,8 @@ async function firebaseRegisterUser(email, password, displayName) {
         gameState.currentUser = {
             id: user.uid,
             name: displayName,
-            email: email
+            email: email,
+            country: country
         };
         
         console.log('✅ User registered:', displayName);
@@ -92,11 +94,16 @@ async function firebaseLoginUser(email, password) {
             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
         });
         
+        // Get user data including country
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.data() || {};
+        
         // Set gameState currentUser
         gameState.currentUser = {
             id: user.uid,
             name: user.displayName || 'Player',
-            email: user.email
+            email: user.email,
+            country: userData.country || 'IL' // Default to Israel for existing users
         };
         
         console.log('✅ User logged in:', user.displayName);
@@ -136,12 +143,23 @@ function getCurrentFirebaseUser() {
 
 // Auth state listener
 function setupAuthStateListener() {
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
         if (user) {
+            // Get user data including country
+            let country = 'IL';
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userData = userDoc.data() || {};
+                country = userData.country || 'IL';
+            } catch (e) {
+                console.log('Could not fetch user country, using default');
+            }
+            
             gameState.currentUser = {
                 id: user.uid,
                 name: user.displayName || 'Player',
-                email: user.email
+                email: user.email,
+                country: country
             };
             console.log('👤 User is signed in:', user.displayName);
             

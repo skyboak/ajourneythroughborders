@@ -43,7 +43,7 @@
         
         body {
             font-family: 'Rubik', sans-serif;
-            background: var(--navy);
+            background: url('רקע.jpg') center center / cover no-repeat fixed;
             color: var(--text-dark);
             overflow: hidden;
             height: 100vh;
@@ -61,6 +61,14 @@
             left: 0;
             background: var(--navy);
             overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        #game-container.visible {
+            opacity: 1;
+            pointer-events: auto;
         }
         
         #game-container canvas {
@@ -123,6 +131,7 @@
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
+            pointer-events: none;
         }
         
         .language-selection.active {
@@ -406,6 +415,38 @@
             box-shadow: 0 3px 8px rgba(0,0,0,0.3);
         }
         
+        /* Download PDF Button */
+        #download-pdf-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--teal);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        #download-pdf-button:hover {
+            background: var(--navy);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        #download-pdf-button .download-icon {
+            font-size: 1.2rem;
+        }
+        
         /* Points earned animation */
         .points-earned {
             position: fixed;
@@ -636,7 +677,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
+            background: url('רקע.jpg') center center / cover no-repeat, rgba(0, 0, 0, 0.95);
             display: none;
             align-items: center;
             justify-content: center;
@@ -646,6 +687,19 @@
         
         .splash-overlay.active {
             display: flex;
+        }
+
+        .splash-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: -1;
         }
         
         .splash-content {
@@ -1348,6 +1402,86 @@
             border-color: var(--orange);
         }
         
+        /* Custom Country Dropdown */
+        .custom-country-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Rubik', sans-serif;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+        
+        .custom-country-select:hover {
+            border-color: var(--orange);
+        }
+        
+        .selected-country {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .country-flag-img {
+            width: 24px;
+            height: 16px;
+            object-fit: cover;
+            border-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .dropdown-arrow {
+            font-size: 0.7rem;
+            color: #666;
+        }
+        
+        .country-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            margin-top: 5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .country-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .country-option:hover {
+            background: var(--cream);
+        }
+        
+        .country-option:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .country-option:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .country-dropdown-container {
+            position: relative;
+            width: 100%;
+        }
+        
         .auth-error {
             color: var(--error);
             font-size: 0.9rem;
@@ -1556,15 +1690,50 @@
             <div id="register-form" class="auth-form" style="display: none;">
                 <input type="text" id="register-name" placeholder="" autocomplete="name">
                 <input type="email" id="register-email" placeholder="" autocomplete="email">
+                <input type="hidden" id="register-country" value="IL">
+                <div class="country-dropdown-container" style="position: relative;">
+                    <div class="custom-country-select" id="country-dropdown" onclick="toggleCountryDropdown()">
+                        <div class="selected-country" id="selected-country">
+                            <img src="https://flagcdn.com/w20/il.png" alt="IL" class="country-flag-img">
+                            <span>Israel / ישראל</span>
+                        </div>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="country-options" id="country-options" style="display: none;">
+                        <div class="country-option" onclick="selectCountry('IL', 'il', 'Israel / ישראל')"><img src="https://flagcdn.com/w20/il.png" class="country-flag-img"><span>Israel / ישראל</span></div>
+                        <div class="country-option" onclick="selectCountry('JO', 'jo', 'Jordan / ירדן')"><img src="https://flagcdn.com/w20/jo.png" class="country-flag-img"><span>Jordan / ירדן</span></div>
+                        <div class="country-option" onclick="selectCountry('SA', 'sa', 'Saudi Arabia / ערב הסעודית')"><img src="https://flagcdn.com/w20/sa.png" class="country-flag-img"><span>Saudi Arabia / ערב הסעודית</span></div>
+                        <div class="country-option" onclick="selectCountry('SY', 'sy', 'Syria / סוריה')"><img src="https://flagcdn.com/w20/sy.png" class="country-flag-img"><span>Syria / סוריה</span></div>
+                        <div class="country-option" onclick="selectCountry('LB', 'lb', 'Lebanon / לבנון')"><img src="https://flagcdn.com/w20/lb.png" class="country-flag-img"><span>Lebanon / לבנון</span></div>
+                        <div class="country-option" onclick="selectCountry('EG', 'eg', 'Egypt / מצרים')"><img src="https://flagcdn.com/w20/eg.png" class="country-flag-img"><span>Egypt / מצרים</span></div>
+                        <div class="country-option" onclick="selectCountry('IQ', 'iq', 'Iraq / עיראק')"><img src="https://flagcdn.com/w20/iq.png" class="country-flag-img"><span>Iraq / עיראק</span></div>
+                        <div class="country-option" onclick="selectCountry('AE', 'ae', 'UAE / איחוד האמירויות')"><img src="https://flagcdn.com/w20/ae.png" class="country-flag-img"><span>UAE / איחוד האמירויות</span></div>
+                        <div class="country-option" onclick="selectCountry('US', 'us', 'USA / ארה&quot;ב')"><img src="https://flagcdn.com/w20/us.png" class="country-flag-img"><span>USA / ארה"ב</span></div>
+                        <div class="country-option" onclick="selectCountry('GB', 'gb', 'UK / בריטניה')"><img src="https://flagcdn.com/w20/gb.png" class="country-flag-img"><span>UK / בריטניה</span></div>
+                        <div class="country-option" onclick="selectCountry('CA', 'ca', 'Canada / קנדה')"><img src="https://flagcdn.com/w20/ca.png" class="country-flag-img"><span>Canada / קנדה</span></div>
+                        <div class="country-option" onclick="selectCountry('AU', 'au', 'Australia / אוסטרליה')"><img src="https://flagcdn.com/w20/au.png" class="country-flag-img"><span>Australia / אוסטרליה</span></div>
+                        <div class="country-option" onclick="selectCountry('FR', 'fr', 'France / צרפת')"><img src="https://flagcdn.com/w20/fr.png" class="country-flag-img"><span>France / צרפת</span></div>
+                        <div class="country-option" onclick="selectCountry('DE', 'de', 'Germany / גרמניה')"><img src="https://flagcdn.com/w20/de.png" class="country-flag-img"><span>Germany / גרמניה</span></div>
+                        <div class="country-option" onclick="selectCountry('IT', 'it', 'Italy / איטליה')"><img src="https://flagcdn.com/w20/it.png" class="country-flag-img"><span>Italy / איטליה</span></div>
+                        <div class="country-option" onclick="selectCountry('ES', 'es', 'Spain / ספרד')"><img src="https://flagcdn.com/w20/es.png" class="country-flag-img"><span>Spain / ספרד</span></div>
+                        <div class="country-option" onclick="selectCountry('NL', 'nl', 'Netherlands / הולנד')"><img src="https://flagcdn.com/w20/nl.png" class="country-flag-img"><span>Netherlands / הולנד</span></div>
+                        <div class="country-option" onclick="selectCountry('RU', 'ru', 'Russia / רוסיה')"><img src="https://flagcdn.com/w20/ru.png" class="country-flag-img"><span>Russia / רוסיה</span></div>
+                        <div class="country-option" onclick="selectCountry('TR', 'tr', 'Turkey / טורקיה')"><img src="https://flagcdn.com/w20/tr.png" class="country-flag-img"><span>Turkey / טורקיה</span></div>
+                        <div class="country-option" onclick="selectCountry('IN', 'in', 'India / הודו')"><img src="https://flagcdn.com/w20/in.png" class="country-flag-img"><span>India / הודו</span></div>
+                        <div class="country-option" onclick="selectCountry('BR', 'br', 'Brazil / ברזיל')"><img src="https://flagcdn.com/w20/br.png" class="country-flag-img"><span>Brazil / ברזיל</span></div>
+                        <div class="country-option" onclick="selectCountry('MX', 'mx', 'Mexico / מקסיקו')"><img src="https://flagcdn.com/w20/mx.png" class="country-flag-img"><span>Mexico / מקסיקו</span></div>
+                        <div class="country-option" onclick="selectCountry('AR', 'ar', 'Argentina / ארגנטינה')"><img src="https://flagcdn.com/w20/ar.png" class="country-flag-img"><span>Argentina / ארגנטינה</span></div>
+                        <div class="country-option" onclick="selectCountry('ZA', 'za', 'South Africa / דרום אפריקה')"><img src="https://flagcdn.com/w20/za.png" class="country-flag-img"><span>South Africa / דרום אפריקה</span></div>
+                        <div class="country-option" onclick="selectCountry('OTHER', 'un', 'Other / אחר')"><img src="https://flagcdn.com/w20/un.png" class="country-flag-img"><span>Other / אחר</span></div>
+                    </div>
+                </div>
                 <input type="password" id="register-password" placeholder="" autocomplete="new-password">
                 <input type="password" id="register-confirm" placeholder="" autocomplete="new-password">
                 <div id="register-error" class="auth-error"></div>
                 <button class="btn btn-primary full-width" onclick="handleRegister()"></button>
             </div>
             
-            <div class="auth-skip">
-                <button class="btn btn-secondary" onclick="skipAuth()"></button>
-            </div>
+            <!-- Guest/skip button removed -->
         </div>
     </div>
     
@@ -1599,6 +1768,10 @@
         <img src="icons/מוזיקה פועלת.png" alt="Music" class="button-icon" id="sound-icon">
     </button>
     <button id="profile-button" class="circular-button" title="Profile">👤</button>
+    <button id="download-pdf-button" onclick="downloadStagePDF()" style="display: none;">
+        <span class="download-icon">📥</span>
+        <span id="download-pdf-text">Download for offline play</span>
+    </button>
     <span id="profile-notification-badge"></span>
     
     <!-- Score Display -->

@@ -724,6 +724,54 @@ window.restartCurrentStage = function() {
     showBriefMessage(message[lang], 'success');
 };
 
+// Download PDF for offline play
+window.downloadStagePDF = function() {
+    const lang = gameState.currentLanguage;
+    const stage = GAME_DATA.stages[gameState.currentStage];
+    
+    if (!stage) return;
+    
+    // Get the Hebrew name for the PDF file (files are named in Hebrew)
+    const stageNameHe = stage.name.he;
+    
+    // Map language code to folder name
+    const langFolders = {
+        he: 'hebrew',
+        en: 'english',
+        ar: 'arabic'
+    };
+    
+    const folder = langFolders[lang] || 'hebrew';
+    
+    // Construct the PDF path
+    const pdfPath = `pdfs/${folder}/${stageNameHe} .pdf`;
+    
+    // Create a temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = pdfPath;
+    link.download = `${stage.name[lang]}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+// Update download button text based on language
+function updateDownloadButton() {
+    const lang = gameState.currentLanguage;
+    const trans = GAME_DATA.translations[lang];
+    const textSpan = document.getElementById('download-pdf-text');
+    const button = document.getElementById('download-pdf-button');
+    
+    if (textSpan && trans.downloadOffline) {
+        textSpan.textContent = trans.downloadOffline;
+    }
+    
+    // Show button when game is started
+    if (button && gameStarted) {
+        button.style.display = 'flex';
+    }
+}
+
 function updateScoreDisplay() {
     const scoreValue = document.getElementById('score-value');
     if (scoreValue) {
@@ -948,6 +996,9 @@ window.selectLanguage = function(lang) {
     document.documentElement.setAttribute('lang', lang);
     document.documentElement.setAttribute('dir', lang === 'ar' || lang === 'he' ? 'rtl' : 'ltr');
     
+    // Update download button text for new language
+    updateDownloadButton();
+    
     const langSelection = document.querySelector('.language-selection');
     if (langSelection) {
         langSelection.style.display = 'none';
@@ -1000,7 +1051,7 @@ function updateAuthScreenText() {
     
     const texts = {
         he: {
-            title: 'התחברות / הרשמה', login: 'התחברות', register: 'הרשמה', guest: 'המשך כאורח', loading: 'מתחבר...', registering: 'נרשם...', fill: 'אנא מלא את כל השדות', mismatch: 'הסיסמאות לא תואמות', passwordShort: 'סיסמה חייבת להיות לפחות 6 תווים', placeholders: { username: 'שם משתמש', email: 'אימייל', password: 'סיסמה', confirm: 'אימות סיסמה' }, unknown: 'שגיאה', errors: {
+            title: 'התחברות / הרשמה', login: 'התחברות', register: 'הרשמה', loading: 'מתחבר...', registering: 'נרשם...', fill: 'אנא מלא את כל השדות', mismatch: 'הסיסמאות לא תואמות', passwordShort: 'סיסמה חייבת להיות לפחות 6 תווים', placeholders: { username: 'שם משתמש', email: 'אימייל', password: 'סיסמה', confirm: 'אימות סיסמה' }, unknown: 'שגיאה', errors: {
                 'auth/invalid-email': 'אימייל לא תקין',
                 'auth/user-not-found': 'משתמש לא נמצא',
                 'auth/wrong-password': 'סיסמה שגויה',
@@ -1012,7 +1063,7 @@ function updateAuthScreenText() {
             }
         },
         en: {
-            title: 'Login / Register', login: 'Login', register: 'Register', guest: 'Continue as Guest', loading: 'Logging in...', registering: 'Registering...', fill: 'Please fill all fields', mismatch: 'Passwords do not match', passwordShort: 'Password must be at least 6 characters', placeholders: { username: 'Username', email: 'Email', password: 'Password', confirm: 'Confirm Password' }, unknown: 'Error', errors: {
+            title: 'Login / Register', login: 'Login', register: 'Register', loading: 'Logging in...', registering: 'Registering...', fill: 'Please fill all fields', mismatch: 'Passwords do not match', passwordShort: 'Password must be at least 6 characters', placeholders: { username: 'Username', email: 'Email', password: 'Password', confirm: 'Confirm Password' }, unknown: 'Error', errors: {
                 'auth/invalid-email': 'Invalid email',
                 'auth/user-not-found': 'User not found',
                 'auth/wrong-password': 'Wrong password',
@@ -1024,7 +1075,7 @@ function updateAuthScreenText() {
             }
         },
         ar: {
-            title: 'تسجيل الدخول / التسجيل', login: 'دخول', register: 'تسجيل', guest: 'المتابعة كضيف', loading: '...جاري تسجيل الدخول', registering: '...جاري التسجيل', fill: 'يرجى ملء جميع الحقول', mismatch: 'كلمات المرور غير متطابقة', passwordShort: 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل', placeholders: { username: 'اسم المستخدم', email: 'البريد الإلكتروني', password: 'كلمة المرور', confirm: 'تأكيد كلمة المرور' }, unknown: 'خطأ', errors: {
+            title: 'تسجيل الدخول / التسجيل', login: 'دخول', register: 'تسجيل', loading: '...جاري تسجيل الدخول', registering: '...جاري التسجيل', fill: 'يرجى ملء جميع الحقول', mismatch: 'كلمات المرور غير متطابقة', passwordShort: 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل', placeholders: { username: 'اسم المستخدم', email: 'البريد الإلكتروني', password: 'كلمة المرور', confirm: 'تأكيد كلمة المرور' }, unknown: 'خطأ', errors: {
                 'auth/invalid-email': 'البريد الإلكتروني غير صالح',
                 'auth/user-not-found': 'المستخدم غير موجود',
                 'auth/wrong-password': 'كلمة المرور خاطئة',
@@ -1050,8 +1101,7 @@ function updateAuthScreenText() {
     if (tabs[0]) tabs[0].textContent = t.login;
     if (tabs[1]) tabs[1].textContent = t.register;
 
-    const skipBtn = document.querySelector('.auth-skip .btn');
-    if (skipBtn) skipBtn.textContent = t.guest;
+    // Removed guest/skip button text
 
     // Update login and register button text
     const loginBtn = document.querySelector('#login-form .btn-primary');
@@ -1162,6 +1212,7 @@ window.handleRegister = async function() {
     const email = document.getElementById('register-email').value.trim();
     const password = document.getElementById('register-password').value;
     const confirm = document.getElementById('register-confirm').value;
+    const country = document.getElementById('register-country').value || 'IL';
     const errorDiv = document.getElementById('register-error');
     
     if (!name || !email || !password || !confirm) {
@@ -1180,7 +1231,7 @@ window.handleRegister = async function() {
     }
     errorDiv.textContent = window.getAuthText('registering');
     
-    const result = await firebaseRegisterUser(email, password, name);
+    const result = await firebaseRegisterUser(email, password, name, country);
     
     if (result.success) {
         errorDiv.textContent = '';
@@ -1196,19 +1247,45 @@ window.handleRegister = async function() {
     }
 };
 
-window.skipAuth = function() {
-    hideAuthScreen();
-    
-    // Set a guest user
-    gameState.currentUser = {
-        id: 'guest_' + Date.now(),
-        name: gameState.currentLanguage === 'he' ? 'אורח' : 
-              gameState.currentLanguage === 'ar' ? 'ضيف' : 'Guest',
-        isGuest: true
-    };
-    
-    showSplashScreens();
+// Removed skipAuth (guest) function
+
+// Custom country dropdown functions
+window.toggleCountryDropdown = function() {
+    const options = document.getElementById('country-options');
+    if (options) {
+        options.style.display = options.style.display === 'none' ? 'block' : 'none';
+    }
 };
+
+window.selectCountry = function(code, flagCode, displayName) {
+    const hiddenInput = document.getElementById('register-country');
+    const selectedDiv = document.getElementById('selected-country');
+    const options = document.getElementById('country-options');
+    
+    if (hiddenInput) {
+        hiddenInput.value = code;
+    }
+    
+    if (selectedDiv) {
+        selectedDiv.innerHTML = `
+            <img src="https://flagcdn.com/w20/${flagCode}.png" alt="${code}" class="country-flag-img">
+            <span>${displayName}</span>
+        `;
+    }
+    
+    if (options) {
+        options.style.display = 'none';
+    }
+};
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('country-dropdown');
+    const options = document.getElementById('country-options');
+    if (dropdown && options && !dropdown.contains(e.target) && !options.contains(e.target)) {
+        options.style.display = 'none';
+    }
+});
 
 function showSplashScreens() {
     const splashOverlay = document.querySelector('.splash-overlay');
@@ -1307,9 +1384,16 @@ async function startGame() {
 function actuallyStartGame() {
     gameStarted = true;
     
+    // Show game container
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+        gameContainer.classList.add('visible');
+    }
+    
     // Show game elements
     setupCircularButtons();
     updateSearchItemCircle();
+    updateDownloadButton();
     
     console.log('✓ Game started! Press D for debug mode');
     console.log('Current stage:', gameState.currentStage);
@@ -1522,10 +1606,14 @@ function showGameTutorial() {
 function continueGameStart() {
     gameStarted = true;
     
-    // Show the circular buttons
-    document.getElementById('game-container').style.opacity = '1';
+    // Show the game container
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+        gameContainer.classList.add('visible');
+    }
     
     setupCircularButtons();
+    updateDownloadButton();
     
     setTimeout(() => {
         updateSearchItemCircle();
@@ -1533,7 +1621,6 @@ function continueGameStart() {
     
     setupEventListeners();
     
-    const gameContainer = document.getElementById('game-container');
     gameContainer.style.animation = 'fadeIn 0.8s ease';
     
     console.log('✓ Game started! Press D for debug mode');
@@ -1981,17 +2068,15 @@ function showVideoIntro() {
     video.currentTime = 0;
     // Show video screen first
     videoIntro.style.display = 'flex';
-    setTimeout(() => {
-        videoIntro.classList.add('active');
-        // Only play after screen is visible
-        setTimeout(() => {
-            video.play().catch(error => {
-                console.error('Video play failed:', error);
-                // If play fails, just skip
-                skipVideo();
-            });
-        }, 100);
-    }, 50);
+    videoIntro.classList.add('active');
+    
+    // Play video immediately
+    video.play().catch(error => {
+        console.error('Video play failed:', error);
+        // If play fails, just skip
+        skipVideo();
+    });
+    
     // When video ends, start game
     video.addEventListener('ended', function() {
         skipVideo();
@@ -2010,13 +2095,14 @@ window.skipVideo = function() {
         video.pause();
     }
     
-    // Hide and start game after fade
+    // Start loading next screen immediately, hide video after fade
+    if (typeof window.continueGameStart === 'function') {
+        window.continueGameStart();
+    }
+    
     setTimeout(() => {
         videoIntro.style.display = 'none';
-        if (typeof window.continueGameStart === 'function') {
-            window.continueGameStart();
-        }
-    }, 500);
+    }, 300);
 };
 
 // Make showVideoIntro accessible globally for postcard-system.js
@@ -2098,17 +2184,13 @@ function showStageVideo(nextStage) {
     
     // Show video screen
     stageVideoDiv.style.display = 'flex';
-    setTimeout(() => {
-        stageVideoDiv.classList.add('active');
-        
-        // Play after screen is visible
-        setTimeout(() => {
-            finalVideo.play().catch(error => {
-                console.error('Stage video play failed:', error);
-                skipStageVideo();
-            });
-        }, 100);
-    }, 50);
+    stageVideoDiv.classList.add('active');
+    
+    // Play immediately
+    finalVideo.play().catch(error => {
+        console.error('Stage video play failed:', error);
+        skipStageVideo();
+    });
     
     // Store next stage for when video ends
     window.pendingStage = nextStage;
@@ -2140,16 +2222,17 @@ window.skipStageVideo = function() {
     console.log('📍 pendingStage:', nextStage);
     console.log('📍 Current gameState.currentStage:', gameState.currentStage);
     
-    // Hide and show stage arrival modal
+    // Show stage arrival modal immediately, hide video after short delay
+    if (nextStage) {
+        console.log('➡️ Showing stage arrival modal for:', nextStage);
+        showStageArrivalModal(nextStage);
+    } else {
+        console.error('❌ No pendingStage found!');
+    }
+    
     setTimeout(() => {
         stageVideoDiv.style.display = 'none';
-        if (nextStage) {
-            console.log('➡️ Showing stage arrival modal for:', nextStage);
-            showStageArrivalModal(nextStage);
-        } else {
-            console.error('❌ No pendingStage found!');
-        }
-    }, 500);
+    }, 300);
 };
 
 // ============================================
@@ -2178,7 +2261,7 @@ function showStageArrivalModal(stage) {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.85);
+        background: url('רקע.jpg') center center / cover no-repeat;
         display: flex;
         align-items: center;
         justify-content: center;

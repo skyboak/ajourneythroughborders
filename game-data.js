@@ -492,8 +492,10 @@ const GAME_DATA = {
             myPostcards: 'הגלויות שלי',
             noPostcards: 'אין לך גלויות עדיין',
             from: 'מאת',
+            stage: 'שלב',
             back: 'חזור',
             reply: 'השב',
+            downloadOffline: 'הורד את התמונה למשחק אופליין',
             stageArrival: {
                 title: 'כל הכבוד! הגעת לשלב',
                 start: 'התחל',
@@ -557,8 +559,10 @@ const GAME_DATA = {
             myPostcards: 'My Postcards',
             noPostcards: 'You don\'t have any postcards yet',
             from: 'From',
+            stage: 'Stage',
             back: 'Back',
             reply: 'Reply',
+            downloadOffline: 'Download for offline play',
             stageArrival: {
                 title: 'Congratulations! You\'ve reached Stage',
                 start: 'Start',
@@ -622,8 +626,10 @@ const GAME_DATA = {
             myPostcards: 'بطاقاتي البريدية',
             noPostcards: 'ليس لديك بطاقات بريدية بعد',
             from: 'من',
+            stage: 'مرحلة',
             back: 'رجوع',
             reply: 'رد',
+            downloadOffline: 'تحميل للعب بدون إنترنت',
             stageArrival: {
                 title: 'مبروك! وصلت للمرحلة',
                 start: 'ابدأ',

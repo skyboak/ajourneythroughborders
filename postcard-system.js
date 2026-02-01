@@ -3,6 +3,41 @@
 // גרסה מותאמת ל-p5 Web Editor (ללא storage API)
 // ============================================
 
+// Country code to flag image URL mapping (using flagcdn.com)
+const COUNTRY_CODES = {
+    'IL': 'il',
+    'JO': 'jo',
+    'SA': 'sa',
+    'SY': 'sy',
+    'LB': 'lb',
+    'EG': 'eg',
+    'IQ': 'iq',
+    'AE': 'ae',
+    'US': 'us',
+    'GB': 'gb',
+    'CA': 'ca',
+    'AU': 'au',
+    'FR': 'fr',
+    'DE': 'de',
+    'IT': 'it',
+    'ES': 'es',
+    'NL': 'nl',
+    'RU': 'ru',
+    'TR': 'tr',
+    'IN': 'in',
+    'BR': 'br',
+    'MX': 'mx',
+    'AR': 'ar',
+    'ZA': 'za',
+    'OTHER': 'un'
+};
+
+// Get flag image HTML for country code (default to Israel)
+function getCountryFlag(countryCode) {
+    const code = COUNTRY_CODES[countryCode] || COUNTRY_CODES['IL'];
+    return `<img src="https://flagcdn.com/w20/${code}.png" alt="${countryCode}" style="width: 20px; height: 14px; object-fit: cover; border-radius: 2px; vertical-align: middle;">`;
+}
+
 // Profanity filter - inappropriate words in multiple languages
 const INAPPROPRIATE_WORDS = {
     he: ['חרא', 'זין', 'כוס', 'מניאק', 'זונה', 'שרמוטה', 'בן זונה', 'אידיוט', 'טמבל', 'מפגר'],
@@ -214,19 +249,61 @@ async function showPostcardModal() {
         ar: 'أو ابحث عن مستخدم:'
     };
     
+    const writeMessageLabel = {
+        he: 'כתוב הודעה',
+        en: 'Write Message',
+        ar: 'اكتب رسالة'
+    };
+    
     modalBody.innerHTML = `
-        <h3>${trans.postcardTitle} ${stage.name[lang]}</h3>
+        <h3 style="color: var(--teal); font-size: 1.5rem; margin-bottom: 15px;">${trans.postcardTitle} ${stage.name[lang]}</h3>
         
-        <!-- Recipient Selection First -->
-        <div style="margin: 15px 0;">
+        <!-- BIG Postcard Preview at Top -->
+        <div style="margin: 0 0 20px 0; display: flex; justify-content: center;">
+            <div id="postcard-preview" style="
+                position: relative;
+                width: 100%;
+                max-width: 450px;
+            ">
+                <img src="postcard.png" alt="Postcard" style="
+                    width: 100%;
+                    height: auto;
+                    display: block;
+                    border-radius: 8px;
+                ">
+                <div 
+                    id="postcard-message-preview"
+                    style="
+                        position: absolute;
+                        top: 50%;
+                        left: 10%;
+                        transform: translateY(-50%);
+                        width: 50%;
+                        max-height: 70%;
+                        font-family: 'Rubik', cursive, sans-serif;
+                        font-size: clamp(0.7rem, 2.5vw, 1rem);
+                        color: #333;
+                        line-height: 1.5;
+                        text-align: left;
+                        word-wrap: break-word;
+                        overflow: hidden;
+                        padding: 8px;
+                        pointer-events: none;
+                    "
+                ></div>
+            </div>
+        </div>
+        
+        <!-- Recipient Selection -->
+        <div style="margin: 0 0 15px 0;">
             <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--navy);">
                 ${trans.selectRecipient}
             </label>
             
             <!-- Suggested Users -->
-            <div style="margin-bottom: 12px;">
-                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">${suggestedLabel[lang]}</div>
-                <div id="suggested-users" style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <div style="margin-bottom: 10px;">
+                <div style="font-size: 0.85rem; color: #666; margin-bottom: 6px;">${suggestedLabel[lang]}</div>
+                <div id="suggested-users" style="display: flex; flex-wrap: wrap; gap: 6px;">
                     ${randomUsers.length > 0 ? randomUsers.map(user => `
                         <button 
                             type="button"
@@ -235,26 +312,30 @@ async function showPostcardModal() {
                             data-user-name="${user.name}"
                             onclick="selectUserChip(this)"
                             style="
-                                padding: 8px 16px;
+                                padding: 6px 14px;
                                 border-radius: 20px;
                                 border: 2px solid var(--teal);
                                 background: white;
                                 color: var(--navy);
                                 font-family: 'Rubik', sans-serif;
-                                font-size: 0.95rem;
+                                font-size: 0.9rem;
                                 cursor: pointer;
                                 transition: all 0.2s ease;
+                                display: flex;
+                                align-items: center;
+                                gap: 6px;
                             "
                         >
-                            ${user.name}
+                            ${getCountryFlag(user.country)}
+                            <span>${user.name}</span>
                         </button>
                     `).join('') : `<span style="color: #999;">${trans.noUsers}</span>`}
                 </div>
             </div>
             
             <!-- Search Input -->
-            <div style="margin-bottom: 10px;">
-                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">${orSearchLabel[lang]}</div>
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 0.85rem; color: #666; margin-bottom: 6px;">${orSearchLabel[lang]}</div>
                 <div style="position: relative;">
                     <input 
                         type="text"
@@ -263,20 +344,20 @@ async function showPostcardModal() {
                         oninput="searchUsers(this.value)"
                         style="
                             width: 100%;
-                            padding: 12px;
+                            padding: 10px;
                             padding-right: 40px;
-                            font-size: 1rem;
+                            font-size: 0.95rem;
                             border: 2px solid var(--orange);
                             border-radius: 10px;
                             font-family: 'Rubik', sans-serif;
                             background: white;
                         "
                     />
-                    <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 1.2rem;">🔍</span>
+                    <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 1.1rem;">🔍</span>
                 </div>
                 <div id="search-results" style="
-                    margin-top: 8px;
-                    max-height: 120px;
+                    margin-top: 6px;
+                    max-height: 100px;
                     overflow-y: auto;
                     display: none;
                 "></div>
@@ -284,20 +365,20 @@ async function showPostcardModal() {
             
             <!-- Selected User Display -->
             <div id="selected-user-display" style="
-                margin-top: 10px;
-                padding: 12px;
+                margin-top: 8px;
+                padding: 10px;
                 background: var(--cream);
                 border-radius: 10px;
                 display: none;
                 align-items: center;
-                gap: 10px;
+                gap: 8px;
             ">
                 <span style="font-weight: 600; color: var(--navy);">✓ </span>
                 <span id="selected-user-name" style="flex: 1; color: var(--navy);"></span>
                 <button type="button" onclick="clearSelectedUser()" style="
                     background: none;
                     border: none;
-                    font-size: 1.2rem;
+                    font-size: 1.1rem;
                     cursor: pointer;
                     color: var(--error);
                 ">✕</button>
@@ -305,64 +386,46 @@ async function showPostcardModal() {
             <input type="hidden" id="postcard-recipient" value="" />
         </div>
         
-        <!-- Postcard Preview - Bigger -->
-        <div style="margin: 15px 0; display: flex; justify-content: center;">
-            <div id="postcard-preview" style="
-                position: relative;
-                width: 100%;
-                max-width: 700px;
-            ">
-                <img src="postcard.png" alt="Postcard" style="
-                    width: 100%;
-                    height: auto;
-                    display: block;
-                    border-radius: 4px;
-                ">
-                <div 
-                    id="postcard-message-editable"
-                    contenteditable="true"
-                    data-placeholder="${trans.messagePlaceholder}"
-                    oninput="handlePostcardInput(this)"
+        <!-- Message Text Box at Bottom -->
+        <div style="margin: 0 0 10px 0;">
+            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--navy);">
+                ${writeMessageLabel[lang]}
+            </label>
+            <div style="position: relative;">
+                <textarea 
+                    id="postcard-message-input"
+                    placeholder="${trans.messagePlaceholder}"
+                    oninput="syncPostcardMessage(this)"
+                    maxlength="150"
+                    rows="3"
                     style="
-                        position: absolute;
-                        top: 12%;
-                        left: 5%;
-                        width: 52%;
-                        height: 76%;
-                        font-family: 'Rubik', cursive, sans-serif;
-                        font-size: 1.1rem;
-                        color: #333;
-                        line-height: 1.6;
-                        text-align: center;
-                        word-wrap: break-word;
-                        overflow-y: auto;
+                        width: 100%;
                         padding: 12px;
-                        outline: none;
-                        cursor: text;
-                        background: rgba(237, 237, 237, 0.6);
-                        border: 2px dashed #000000;
-                        border-radius: 8px;
-                        transition: background 0.2s, border-color 0.2s;
+                        font-size: 1rem;
+                        border: 2px solid var(--orange);
+                        border-radius: 10px;
+                        font-family: 'Rubik', sans-serif;
+                        background: white;
+                        resize: none;
+                        line-height: 1.5;
                     "
-                    onfocus="this.style.background='rgba(255, 255, 255, 0.8)'; this.style.borderColor='#333333'"
-                    onblur="this.style.background='rgba(237, 237, 237, 0.6)'; this.style.borderColor='#000000'"
-                ></div>
+                ></textarea>
                 <div style="
                     position: absolute;
-                    bottom: 5px;
-                    left: 5%;
+                    bottom: 8px;
+                    right: 10px;
                     font-size: 0.8rem;
-                    color: #666;
-                    background: rgba(255,255,255,0.8);
+                    color: #888;
+                    background: rgba(255,255,255,0.9);
                     padding: 2px 6px;
                     border-radius: 4px;
-                "><span id="char-count">0</span>/200</div>
+                "><span id="char-count">0</span>/150</div>
             </div>
         </div>
         
         <input type="hidden" id="postcard-message" value="" />
         
-        <div id="postcard-error" style="color: var(--error); text-align: center; min-height: 20px; font-size: 0.9rem; margin-bottom: 10px;"></div>
+        <div id="postcard-error" style="color: var(--error); text-align: center; min-height: 18px; font-size: 0.85rem; margin-bottom: 8px;"></div>
         
         <div class="modal-buttons">
             <button class="btn btn-secondary" onclick="closeModal()">
@@ -462,11 +525,15 @@ window.searchUsers = function(query) {
                     cursor: pointer;
                     border-bottom: 1px solid #eee;
                     transition: background 0.2s;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
                 "
                 onmouseover="this.style.background='var(--cream)'"
                 onmouseout="this.style.background='white'"
             >
-                ${user.name}
+                ${getCountryFlag(user.country)}
+                <span>${user.name}</span>
             </div>
         `).join('');
     }
@@ -477,15 +544,38 @@ window.searchUsers = function(query) {
     resultsDiv.style.borderRadius = '8px';
 };
 
-// Handle postcard direct input
+// Sync textarea with postcard preview
+window.syncPostcardMessage = function(textarea) {
+    const text = textarea.value || '';
+    const charCount = document.getElementById('char-count');
+    const hiddenInput = document.getElementById('postcard-message');
+    const previewDiv = document.getElementById('postcard-message-preview');
+    
+    // Update character count
+    if (charCount) {
+        charCount.textContent = text.length;
+    }
+    
+    // Update hidden input for form submission
+    if (hiddenInput) {
+        hiddenInput.value = text;
+    }
+    
+    // Update the preview on the postcard
+    if (previewDiv) {
+        previewDiv.textContent = text;
+    }
+};
+
+// Handle postcard direct input (legacy - kept for backwards compatibility)
 window.handlePostcardInput = function(element) {
     const text = element.innerText || '';
     const charCount = document.getElementById('char-count');
     const hiddenInput = document.getElementById('postcard-message');
     
-    // Limit to 200 characters
-    if (text.length > 200) {
-        element.innerText = text.substring(0, 200);
+    // Limit to 150 characters
+    if (text.length > 150) {
+        element.innerText = text.substring(0, 150);
         // Move cursor to end
         const range = document.createRange();
         const sel = window.getSelection();
@@ -495,14 +585,14 @@ window.handlePostcardInput = function(element) {
         sel.addRange(range);
     }
     
-    const currentLength = Math.min(text.length, 200);
+    const currentLength = Math.min(text.length, 150);
     
     if (charCount) {
         charCount.textContent = currentLength;
     }
     
     if (hiddenInput) {
-        hiddenInput.value = text.substring(0, 200);
+        hiddenInput.value = text.substring(0, 150);
     }
 };
 
@@ -563,15 +653,14 @@ async function sendPostcard() {
     const recipientId = document.getElementById('postcard-recipient').value;
     const message = document.getElementById('postcard-message').value.trim();
     
-    // Check if user is logged in (not guest)
-    const isGuest = gameState.currentUser?.isGuest;
-    if (isGuest) {
-        const guestMessage = {
+    // Check if user is logged in
+    if (!gameState.currentUser) {
+        const loginMessage = {
             he: 'יש להתחבר כדי לשלוח גלויות',
             en: 'Please login to send postcards',
             ar: 'يرجى تسجيل الدخول لإرسال البطاقات البريدية'
         };
-        errorDiv.textContent = guestMessage[lang] || guestMessage.en;
+        errorDiv.textContent = loginMessage[lang] || loginMessage.en;
         return;
     }
     
@@ -771,6 +860,7 @@ async function showMyPostcards() {
     const postcardsHTML = postcards.map((postcard, index) => {
         const dateStr = new Date(postcard.timestamp).toLocaleDateString(lang === 'he' ? 'he-IL' : lang === 'ar' ? 'ar-SA' : 'en-US');
         const isUnread = !postcard.read;
+        const senderCountryFlag = postcard.from.country ? getCountryFlag(postcard.from.country) : '';
         
         return `
             <div class="postcard-item ${isUnread ? 'unread' : ''}" 
@@ -787,10 +877,10 @@ async function showMyPostcards() {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                     <div>
                         <strong style="color: var(--navy); font-size: 1.05rem;">
-                            ${isUnread ? '🔵 ' : ''}${trans.from} ${postcard.from.name}
+                            ${isUnread ? '🔵 ' : ''}${trans.from} ${postcard.from.name} ${senderCountryFlag}
                         </strong>
                         <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
-                            ${postcard.stageName} • ${dateStr}
+                            ${trans.stage || 'Stage'}: ${postcard.stageName} • ${dateStr}
                         </div>
                     </div>
                 </div>
@@ -845,13 +935,15 @@ async function viewPostcard(index) {
     const modal = document.querySelector('.modal-overlay');
     const modalBody = document.querySelector('.modal-body');
     
+    const senderCountryFlag = postcard.from.country ? getCountryFlag(postcard.from.country) : '';
+    
     modalBody.innerHTML = `
         <div style="text-align: center;">
             <h3 style="color: var(--orange); margin-bottom: 10px;">
-                ${trans.from} ${postcard.from.name}
+                ${trans.from} ${postcard.from.name} ${senderCountryFlag}
             </h3>
             <div style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
-                ${postcard.stageName} • ${dateStr}
+                ${trans.stage || 'Stage'}: ${postcard.stageName} • ${dateStr}
             </div>
         </div>
         

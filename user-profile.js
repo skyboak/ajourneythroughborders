@@ -585,6 +585,11 @@ window.saveProfileSettings = async function() {
         gameState.currentLanguage = lang;
         document.documentElement.setAttribute('lang', lang);
         document.documentElement.setAttribute('dir', lang === 'ar' || lang === 'he' ? 'rtl' : 'ltr');
+        
+        // Update download button text
+        if (typeof updateDownloadButton === 'function') {
+            updateDownloadButton();
+        }
     }
     
     gameState.soundEnabled = sound;
@@ -832,6 +837,11 @@ window.continueGameStart = async function() {
             gameState.currentLanguage = settings.language;
             document.documentElement.setAttribute('lang', settings.language);
             document.documentElement.setAttribute('dir', settings.language === 'ar' || settings.language === 'he' ? 'rtl' : 'ltr');
+            
+            // Update download button text
+            if (typeof updateDownloadButton === 'function') {
+                updateDownloadButton();
+            }
         }
         
         if (typeof settings.soundEnabled !== 'undefined') {
@@ -935,7 +945,7 @@ window.showProfilePostcards = async function() {
             backToGame: 'חזור למשחק',
             noPostcards: 'אין לך גלויות עדיין',
             from: 'מאת:',
-            stage: 'מ:',
+            stage: 'שלב:',
             markRead: 'סמן כנקרא',
             delete: 'מחק',
             unread: 'חדש'
@@ -948,7 +958,7 @@ window.showProfilePostcards = async function() {
             backToGame: 'Back to Game',
             noPostcards: 'You have no postcards yet',
             from: 'From:',
-            stage: 'From:',
+            stage: 'Stage:',
             markRead: 'Mark as Read',
             delete: 'Delete',
             unread: 'New'
@@ -961,7 +971,7 @@ window.showProfilePostcards = async function() {
             backToGame: 'العودة إلى اللعبة',
             noPostcards: 'ليس لديك بطاقات بريدية بعد',
             from: 'من:',
-            stage: 'من:',
+            stage: 'مرحلة:',
             markRead: 'وضع علامة مقروء',
             delete: 'حذف',
             unread: 'جديد'
@@ -986,12 +996,14 @@ window.showProfilePostcards = async function() {
             const dateStr = new Date(postcard.timestamp?.toDate ? postcard.timestamp.toDate() : postcard.timestamp)
                 .toLocaleDateString(lang === 'he' ? 'he-IL' : lang === 'ar' ? 'ar-SA' : 'en-US');
             const isUnread = !postcard.read;
+            const senderCountry = postcard.from?.country || postcard.fromCountry;
+            const countryFlag = senderCountry ? `<img src="https://flagcdn.com/w20/${senderCountry.toLowerCase()}.png" alt="" style="width: 20px; height: 14px; object-fit: cover; border-radius: 2px; vertical-align: middle; margin-left: 5px;">` : '';
             
             return `
                 <div class="postcard-card ${isUnread ? 'unread' : ''}" onclick="viewPostcardInProfile(${index})">
                     ${isUnread ? `<span class="postcard-badge">${t.unread}</span>` : ''}
                     <div class="postcard-header">
-                        <span class="postcard-from">${t.from} ${postcard.from?.name || postcard.fromName || 'Unknown'}</span>
+                        <span class="postcard-from">${t.from} ${postcard.from?.name || postcard.fromName || 'Unknown'} ${countryFlag}</span>
                         <span class="postcard-date">${dateStr}</span>
                     </div>
                     <div class="postcard-stage">${t.stage} ${postcard.stageName}</div>
@@ -1058,13 +1070,16 @@ window.viewPostcardInProfile = async function(index) {
     }
     
     const t = {
-        he: { back: 'חזרה לגלויות', from: 'מאת:', stage: 'נשלח מ:', date: 'תאריך:' },
-        en: { back: 'Back to Postcards', from: 'From:', stage: 'Sent from:', date: 'Date:' },
-        ar: { back: 'العودة للبطاقات', from: 'من:', stage: 'أرسلت من:', date: 'التاריخ:' }
+        he: { back: 'חזרה לגלויות', from: 'מאת:', stage: 'שלב:', date: 'תאריך:' },
+        en: { back: 'Back to Postcards', from: 'From:', stage: 'Stage:', date: 'Date:' },
+        ar: { back: 'العودة للبطاقات', from: 'من:', stage: 'مرحلة:', date: 'التاריخ:' }
     }[lang];
     
     const dateStr = new Date(postcard.timestamp?.toDate ? postcard.timestamp.toDate() : postcard.timestamp)
         .toLocaleDateString(lang === 'he' ? 'he-IL' : lang === 'ar' ? 'ar-SA' : 'en-US');
+    
+    const senderCountry = postcard.from?.country || postcard.fromCountry;
+    const countryFlag = senderCountry ? `<img src="https://flagcdn.com/w20/${senderCountry.toLowerCase()}.png" alt="" style="width: 20px; height: 14px; object-fit: cover; border-radius: 2px; vertical-align: middle; margin-left: 5px;">` : '';
     
     const profilePage = document.getElementById('profile-page');
     const container = profilePage.querySelector('.profile-content');
@@ -1077,7 +1092,7 @@ window.viewPostcardInProfile = async function(index) {
             
             <div class="postcard-full-card">
                 <div class="postcard-full-header">
-                    <div class="postcard-full-from">${t.from} ${postcard.from?.name || postcard.fromName || 'Unknown'}</div>
+                    <div class="postcard-full-from">${t.from} ${postcard.from?.name || postcard.fromName || 'Unknown'} ${countryFlag}</div>
                     <div class="postcard-full-meta">
                         <span>${t.stage} ${postcard.stageName}</span>
                         <span>${t.date} ${dateStr}</span>

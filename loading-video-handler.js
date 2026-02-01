@@ -42,16 +42,16 @@
             if (logoSplash) {
                 logoSplash.style.opacity = '0';
                 
+                // Show language selection immediately
+                const langSelection = document.querySelector('.language-selection');
+                if (langSelection) {
+                    langSelection.classList.add('active');
+                }
+                
                 setTimeout(() => {
                     logoSplash.classList.remove('active');
                     logoSplash.style.display = 'none';
-                    
-                    // Show language selection
-                    const langSelection = document.querySelector('.language-selection');
-                    if (langSelection) {
-                        langSelection.classList.add('active');
-                    }
-                }, 500);
+                }, 300);
             }
         });
         
