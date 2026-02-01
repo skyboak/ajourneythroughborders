@@ -284,7 +284,8 @@ async function showPostcardModal() {
                         font-size: clamp(0.7rem, 2.5vw, 1rem);
                         color: #333;
                         line-height: 1.5;
-                        text-align: left;
+                        text-align: ${lang === 'he' || lang === 'ar' ? 'right' : 'left'};
+                        direction: ${lang === 'he' || lang === 'ar' ? 'rtl' : 'ltr'};
                         word-wrap: break-word;
                         overflow: hidden;
                         padding: 8px;

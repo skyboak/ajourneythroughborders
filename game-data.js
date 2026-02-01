@@ -495,9 +495,9 @@ const GAME_DATA = {
             stage: 'שלב',
             back: 'חזור',
             reply: 'השב',
-            downloadOffline: 'הורד את התמונה למשחק אופליין',
+            downloadOffline: 'לחץ כאן להורדת והדפסת השלב',
             stageArrival: {
-                title: 'כל הכבוד! הגעת לשלב',
+                title: 'הגעת לשלב',
                 start: 'התחל',
                 countries: {
                     saudi: 'ערב הסעודית',
@@ -562,9 +562,9 @@ const GAME_DATA = {
             stage: 'Stage',
             back: 'Back',
             reply: 'Reply',
-            downloadOffline: 'Download for offline play',
+            downloadOffline: 'Click here to download and print this level',
             stageArrival: {
-                title: 'Congratulations! You\'ve reached Stage',
+                title: 'You\'ve reached Stage',
                 start: 'Start',
                 countries: {
                     saudi: 'Saudi Arabia',
@@ -629,9 +629,9 @@ const GAME_DATA = {
             stage: 'مرحلة',
             back: 'رجوع',
             reply: 'رد',
-            downloadOffline: 'تحميل للعب بدون إنترنت',
+            downloadOffline: 'اضغط هنا لتحميل وطباعة المرحلة',
             stageArrival: {
-                title: 'مبروك! وصلت للمرحلة',
+                title: 'وصلت للمرحلة',
                 start: 'ابدأ',
                 countries: {
                     saudi: 'السعودية',

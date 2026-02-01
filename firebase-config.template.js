@@ -281,6 +281,7 @@ async function sendPostcardToFirebase(recipientId, message, stageName) {
     const postcard = {
         fromId: user.uid,
         fromName: user.displayName || 'Anonymous',
+        fromCountry: gameState.currentUser?.country || 'IL',
         toId: recipientId,
         stage: gameState.currentStage,
         stageName: stageName,
@@ -317,7 +318,8 @@ async function getMyPostcardsFromFirebase() {
             const data = doc.data();
             postcards.push({
                 id: doc.id,
-                from: { name: data.fromName, id: data.fromId },
+                from: { name: data.fromName, id: data.fromId, country: data.fromCountry || null },
+                fromCountry: data.fromCountry || null,
                 ...data
             });
         });
