@@ -1300,14 +1300,14 @@ function showSplashScreens() {
             button: translations.splash.welcome.button
         },
         {
-            title: translations.splash.howToPlay.title,
-            text: translations.splash.howToPlay.text,
-            button: translations.splash.howToPlay.button
-        },
-        {
             title: translations.splash.about.title,
             text: translations.splash.about.text,
             button: translations.splash.about.button
+        },
+        {
+            title: translations.splash.howToPlay.title,
+            text: translations.splash.howToPlay.text,
+            button: translations.splash.howToPlay.button
         }
     ];
     

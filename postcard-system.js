@@ -282,21 +282,22 @@ async function showPostcardModal() {
                     id="postcard-message-preview"
                     style="
                         position: absolute;
-                        top: 50%;
+                        top: 67%;
                         left: 50%;
                         transform: translate(-50%, -50%);
-                        width: 80%;
-                        max-height: 70%;
+                        width: 68%;
+                        height: 38%;
                         font-family: 'Rubik', cursive, sans-serif;
-                        font-size: clamp(0.7rem, 2.5vw, 1rem);
+                        font-size: clamp(0.6rem, 2vw, 0.85rem);
                         color: #333;
                         line-height: 1.5;
                         text-align: center;
                         direction: ${lang === 'he' || lang === 'ar' ? 'rtl' : 'ltr'};
                         word-wrap: break-word;
                         overflow: hidden;
-                        padding: 8px;
+                        padding: 4px 10px;
                         pointer-events: none;
+                        box-sizing: border-box;
                     "
                 ></div>
             </div>
@@ -404,7 +405,7 @@ async function showPostcardModal() {
                     id="postcard-message-input"
                     placeholder="${trans.messagePlaceholder}"
                     oninput="syncPostcardMessage(this)"
-                    maxlength="150"
+                    maxlength="100"
                     rows="3"
                     style="
                         width: 100%;
@@ -427,7 +428,7 @@ async function showPostcardModal() {
                     background: rgba(255,255,255,0.9);
                     padding: 2px 6px;
                     border-radius: 4px;
-                "><span id="char-count">0</span>/150</div>
+                "><span id="char-count">0</span>/100</div>
             </div>
         </div>
         
@@ -581,9 +582,9 @@ window.handlePostcardInput = function(element) {
     const charCount = document.getElementById('char-count');
     const hiddenInput = document.getElementById('postcard-message');
     
-    // Limit to 150 characters
-    if (text.length > 150) {
-        element.innerText = text.substring(0, 150);
+    // Limit to 100 characters
+    if (text.length > 100) {
+        element.innerText = text.substring(0, 100);
         // Move cursor to end
         const range = document.createRange();
         const sel = window.getSelection();
@@ -593,14 +594,14 @@ window.handlePostcardInput = function(element) {
         sel.addRange(range);
     }
     
-    const currentLength = Math.min(text.length, 150);
+    const currentLength = Math.min(text.length, 100);
     
     if (charCount) {
         charCount.textContent = currentLength;
     }
     
     if (hiddenInput) {
-        hiddenInput.value = text.substring(0, 150);
+        hiddenInput.value = text.substring(0, 100);
     }
 };
 
