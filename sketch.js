@@ -1395,6 +1395,12 @@ function actuallyStartGame() {
     updateSearchItemCircle();
     updateDownloadButton();
     
+    // Start music for current stage
+    if (typeof playStageMusic === 'function') {
+        console.log('🎵 Starting music for stage:', gameState.currentStage);
+        playStageMusic(gameState.currentStage);
+    }
+    
     console.log('✓ Game started! Press D for debug mode');
     console.log('Current stage:', gameState.currentStage);
     console.log('Looking for item:', gameState.currentSearchItem);
@@ -2446,6 +2452,12 @@ function showStageArrivalModal(stage) {
     
     // Handle start button click
     btn.addEventListener('click', () => {
+        // Start music for this stage when user clicks
+        if (typeof playStageMusic === 'function') {
+            console.log('🎵 Starting music from stage arrival button:', stage);
+            playStageMusic(stage);
+        }
+        
         modal.style.animation = 'fadeOut 0.3s ease';
         setTimeout(() => {
             modal.remove();
