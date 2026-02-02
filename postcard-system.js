@@ -224,6 +224,13 @@ async function showPostcardModal() {
     const stage = GAME_DATA.stages[gameState.currentStage];
     const modal = document.querySelector('.modal-overlay');
     const modalBody = document.querySelector('.modal-body');
+    const modalContent = document.querySelector('.modal-content');
+    
+    // Ensure modal content can scroll properly
+    if (modalContent) {
+        modalContent.style.maxHeight = '90vh';
+        modalContent.style.overflowY = 'auto';
+    }
     
     // Get all users and cache them
     allUsersCache = await getAllUsers();
@@ -256,7 +263,7 @@ async function showPostcardModal() {
     };
     
     modalBody.innerHTML = `
-        <h3 style="color: var(--teal); font-size: 1.5rem; margin-bottom: 15px;">${trans.postcardTitle} ${stage.name[lang]}</h3>
+        <h3 style="color: var(--teal); font-size: 1.5rem; margin-bottom: 15px;">${trans.postcardTitle}${stage.name[lang]}</h3>
         
         <!-- BIG Postcard Preview at Top -->
         <div style="margin: 0 0 20px 0; display: flex; justify-content: center;">
@@ -276,15 +283,15 @@ async function showPostcardModal() {
                     style="
                         position: absolute;
                         top: 50%;
-                        left: 10%;
-                        transform: translateY(-50%);
-                        width: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 80%;
                         max-height: 70%;
                         font-family: 'Rubik', cursive, sans-serif;
                         font-size: clamp(0.7rem, 2.5vw, 1rem);
                         color: #333;
                         line-height: 1.5;
-                        text-align: ${lang === 'he' || lang === 'ar' ? 'right' : 'left'};
+                        text-align: center;
                         direction: ${lang === 'he' || lang === 'ar' ? 'rtl' : 'ltr'};
                         word-wrap: break-word;
                         overflow: hidden;

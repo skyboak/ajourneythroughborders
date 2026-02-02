@@ -114,22 +114,16 @@ function setMusicVolume(volume) {
 
 // מאזין לאינטראקציה ראשונה (כדי לעקוף את חסימת autoplay)
 let firstInteraction = false;
+let gameActuallyStarted = false; // דגל חדש - האם המשחק התחיל בפועל
 
 function handleFirstInteraction() {
     if (firstInteraction) return;
     firstInteraction = true;
     
-    console.log('👆 אינטראקציה ראשונה - מפעיל מוזיקה');
+    console.log('👆 אינטראקציה ראשונה - מוזיקה מוכנה');
     
-    // אם יש שלב שחיכה לניגון
-    if (window._pendingMusicStage) {
-        playStageMusic(window._pendingMusicStage);
-        window._pendingMusicStage = null;
-    }
-    // או אם יש שלב נוכחי
-    else if (gameState && gameState.currentStage) {
-        playStageMusic(gameState.currentStage);
-    }
+    // לא מנגנים מוזיקה עד שהמשחק באמת מתחיל
+    // המוזיקה תתחיל רק כאשר השחקן נכנס לשלב ראשון
 }
 
 // הוספת מאזינים
@@ -156,8 +150,14 @@ function watchStageChanges() {
             console.log(`🔄 שלב השתנה: ${lastStage} → ${gameState.currentStage}`);
             lastStage = gameState.currentStage;
             
-            // ניגון מוזיקה לשלב החדש
-            if (musicEnabled) {
+            // סימון שהמשחק התחיל בפועל
+            if (!gameActuallyStarted && gameState.currentStage) {
+                gameActuallyStarted = true;
+                console.log('🎮 המשחק התחיל - מתחיל מוזיקה');
+            }
+            
+            // ניגון מוזיקה לשלב החדש - רק אם המשחק התחיל
+            if (musicEnabled && gameActuallyStarted) {
                 playStageMusic(gameState.currentStage);
             }
         }

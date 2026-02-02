@@ -116,7 +116,7 @@ function drawCountryTitle() {
     rect(titleX, titleY, textW + paddingX * 2, boxHeight, 15);
     
     // Draw text - offset slightly to account for font baseline
-    fill(255, 215, 0); // Gold color
+    fill(255); // White color
     text(countryName, titleX, titleY + 2);
     
     pop();
@@ -1642,14 +1642,20 @@ function showItemInfoModal(item) {
     const lang = gameState.currentLanguage;
     const modal = document.querySelector('.modal-overlay');
     const modalBody = document.querySelector('.modal-body');
+    const modalContent = document.querySelector('.modal-content');
     const trans = GAME_DATA.translations[lang];
     
     // Set flag to indicate we're showing item info modal
     gameState.showingItemInfo = true;
     
+    // Add white background class for item info modals
+    if (modalContent) {
+        modalContent.style.background = '#ffffff';
+    }
+    
     modalBody.innerHTML = `
         <h3>${trans.congratulations}</h3>
-        <div style="width: 100%; max-width: 250px; height: 200px; margin: 15px auto; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; background: var(--cream);">
+        <div style="width: 100%; max-width: 250px; height: 200px; margin: 15px auto; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px;">
             <img src="${item.image}" alt="${item.name[lang]}" style="width: 100%; height: 100%; object-fit: contain;">
         </div>
         <h4 style="text-align: center; color: var(--orange); font-size: 1.5rem; margin-bottom: 15px;">
@@ -1721,6 +1727,12 @@ window.openPostcardForm = function() {
 
 window.closeModal = function() {
     const modal = document.querySelector('.modal-overlay');
+    const modalContent = document.querySelector('.modal-content');
+    
+    // Reset modal background to default cream color
+    if (modalContent) {
+        modalContent.style.background = 'var(--cream)';
+    }
     
     // Check if we're closing the postcard modal and came from stage complete
     const isPostcardModal = document.getElementById('postcard-recipient') !== null;
@@ -1777,8 +1789,7 @@ window.continueToNextStage = function() {
 
 function showGameCompleteModal() {
     const lang = gameState.currentLanguage;
-    const modal = document.querySelector('.modal-overlay');
-    const modalBody = document.querySelector('.modal-body');
+    const isRTL = lang === 'he' || lang === 'ar';
     
     const finalScore = currentScore;
     
@@ -1786,7 +1797,7 @@ function showGameCompleteModal() {
     
     const text = {
         he: {
-            title: '🎉 סיימת את המשחק!',
+            title: 'סיימת את המשחק!',
             scoreLabel: 'הניקוד הסופי שלך:',
             saving: 'שומר לטבלת השיאים...',
             viewLeaderboard: 'צפה בטבלת השיאים',
@@ -1795,7 +1806,7 @@ function showGameCompleteModal() {
             followButton: 'עקבו באינסטגרם'
         },
         en: {
-            title: '🎉 Game Complete!',
+            title: 'Game Complete!',
             scoreLabel: 'Your final score:',
             saving: 'Saving to leaderboard...',
             viewLeaderboard: 'View Leaderboard',
@@ -1804,7 +1815,7 @@ function showGameCompleteModal() {
             followButton: 'Follow on Instagram'
         },
         ar: {
-            title: '🎉 أكملت اللعبة!',
+            title: 'أكملت اللعبة!',
             scoreLabel: 'نتيجتك النهائية:',
             saving: 'حفظ في لوحة المتصدرين...',
             viewLeaderboard: 'عرض لوحة المتصدرين',
@@ -1816,19 +1827,74 @@ function showGameCompleteModal() {
     
     const t = text[lang];
     
-    modalBody.innerHTML = `
+    // Remove existing modal if any
+    const existingModal = document.getElementById('game-complete-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    const modal = document.createElement('div');
+    modal.id = 'game-complete-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('רקע.jpg') center center / cover no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    // Create blur overlay
+    const blurOverlay = document.createElement('div');
+    blurOverlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        background: rgba(0, 0, 0, 0.3);
+    `;
+    modal.appendChild(blurOverlay);
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.style.cssText = `
+        position: relative;
+        z-index: 1;
+        background: #ededed;
+        border-radius: 20px;
+        padding: 50px 60px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        border: 2px solid #000000;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        direction: ${isRTL ? 'rtl' : 'ltr'};
+    `;
+    
+    contentDiv.innerHTML = `
         <div style="text-align: center;">
-            <h2 style="color: var(--orange); margin-bottom: 20px;">${t.title}</h2>
-            <div style="font-size: 3rem; color: var(--teal); margin: 30px 0;">
-                ⭐ ${finalScore}
+            <h2 style="color: #000000; margin-bottom: 20px; font-size: 2rem;">${t.title}</h2>
+            <div style="font-size: 3rem; color: #000000; margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <img src="icons/כוכב של ניקוד.png" alt="Score" style="width: 50px; height: 50px;">
+                ${finalScore}
             </div>
-            <p style="margin-bottom: 20px;">${t.scoreLabel}</p>
+            <p style="margin-bottom: 20px; color: #000000;">${t.scoreLabel}</p>
             
             <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #ccc;">
-                <p style="margin-bottom: 15px; font-weight: bold;">${t.followUs}</p>
+                <p style="margin-bottom: 15px; font-weight: bold; color: #000000;">${t.followUs}</p>
                 <a href="${instagramUrl}" target="_blank" style="
-                    display: inline-block;
-                    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: #000000;
                     color: #ffffff;
                     padding: 12px 30px;
                     font-size: 16px;
@@ -1836,21 +1902,52 @@ function showGameCompleteModal() {
                     border-radius: 25px;
                     text-decoration: none;
                     transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
-                ">${t.followButton}</a>
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                ">
+                    <img src="icons/instagram.png" alt="Instagram" style="width: 24px; height: 24px; filter: invert(1);">
+                    ${t.followButton}
+                </a>
             </div>
         </div>
         <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
-            <button class="btn btn-primary" onclick="showLeaderboard()">${t.viewLeaderboard}</button>
-            <button class="btn btn-secondary" onclick="restartGame()">${t.playAgain}</button>
+            <button class="btn" onclick="showLeaderboard()" style="
+                background: #000000;
+                color: #ffffff;
+                border: none;
+                padding: 12px 30px;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            ">${t.viewLeaderboard}</button>
+            <button class="btn" onclick="closeGameCompleteModal(); restartGame();" style="
+                background: transparent;
+                color: #000000;
+                border: 2px solid #000000;
+                padding: 12px 30px;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 25px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            ">${t.playAgain}</button>
         </div>
     `;
     
-    modal.classList.add('active');
+    modal.appendChild(contentDiv);
+    document.body.appendChild(modal);
     
     // Save score to leaderboard
     saveToLeaderboard(finalScore);
 }
+
+window.closeGameCompleteModal = function() {
+    const modal = document.getElementById('game-complete-modal');
+    if (modal) {
+        modal.remove();
+    }
+};
 
 async function saveToLeaderboard(score) {
     const statusEl = document.getElementById('saving-status');
@@ -1898,12 +1995,19 @@ async function saveToLeaderboard(score) {
 
 async function showLeaderboard() {
     const lang = gameState.currentLanguage;
+    
+    // Close game complete modal if it exists
+    const gameCompleteModal = document.getElementById('game-complete-modal');
+    if (gameCompleteModal) {
+        gameCompleteModal.remove();
+    }
+    
     const modal = document.querySelector('.modal-overlay');
     const modalBody = document.querySelector('.modal-body');
     
     const text = {
         he: {
-            title: '🏆 טבלת השיאים',
+            title: 'טבלת השיאים',
             rank: 'דירוג',
             name: 'שם',
             score: 'ניקוד',
@@ -1912,7 +2016,7 @@ async function showLeaderboard() {
             playAgain: 'שחק שוב'
         },
         en: {
-            title: '🏆 Leaderboard',
+            title: 'Leaderboard',
             rank: 'Rank',
             name: 'Name',
             score: 'Score',
@@ -1921,7 +2025,7 @@ async function showLeaderboard() {
             playAgain: 'Play Again'
         },
         ar: {
-            title: '🏆 لوحة المتصدرين',
+            title: 'لوحة المتصدرين',
             rank: 'الترتيب',
             name: 'الاسم',
             score: 'النتيجة',
@@ -1962,11 +2066,11 @@ async function showLeaderboard() {
         tableRows = `<tr><td colspan="3" style="text-align: center; padding: 20px;">${t.noScores}</td></tr>`;
     } else {
         leaderboard.slice(0, 10).forEach((entry, index) => {
-            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);
+            const rank = index + 1;
             tableRows += `
                 <tr>
-                    <td style="text-align: center; font-size: 1.2rem;">${medal}</td>
-                    <td>${entry.name}</td>
+                    <td style="text-align: center; font-size: 1.2rem;">${rank}</td>
+                    <td style="text-align: center;">${entry.name}</td>
                     <td style="text-align: center; font-weight: bold; color: var(--orange);">${entry.score}</td>
                 </tr>
             `;
@@ -1991,6 +2095,8 @@ async function showLeaderboard() {
             <button class="btn btn-secondary" onclick="restartGame()">${t.playAgain}</button>
         </div>
     `;
+    
+    modal.classList.add('active');
 }
 
 window.showLeaderboard = showLeaderboard;
@@ -2269,17 +2375,35 @@ function showStageArrivalModal(stage) {
         animation: fadeIn 0.3s ease;
     `;
     
-    modal.innerHTML = `
-        <div style="
-            background: #ededed;
-            border-radius: 20px;
-            padding: 50px 60px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            border: 2px solid #000000;
-            max-width: 500px;
-            direction: ${isRTL ? 'rtl' : 'ltr'};
-        ">
+    // Create blur overlay
+    const blurOverlay = document.createElement('div');
+    blurOverlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        background: rgba(0, 0, 0, 0.3);
+    `;
+    modal.appendChild(blurOverlay);
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.style.cssText = `
+        position: relative;
+        z-index: 1;
+        background: #ededed;
+        border-radius: 20px;
+        padding: 50px 60px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        border: 2px solid #000000;
+        max-width: 500px;
+        direction: ${isRTL ? 'rtl' : 'ltr'};
+    `;
+    
+    contentDiv.innerHTML = `
             <h1 style="
                 color: #000000;
                 font-size: 28px;
@@ -2304,9 +2428,9 @@ function showStageArrivalModal(stage) {
                 transition: all 0.3s ease;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             ">${t.start}</button>
-        </div>
     `;
     
+    modal.appendChild(contentDiv);
     document.body.appendChild(modal);
     
     // Add hover effect
@@ -2340,11 +2464,22 @@ window.showPassportVideo = function() {
     
     const stageVideoDiv = document.getElementById('stage-video');
     const video = document.getElementById('stage-video-player');
+    const skipBtn = document.getElementById('skip-stage-btn');
     
     if (!stageVideoDiv || !video) {
         console.error('Stage video elements not found');
         showGameCompleteModal();
         return;
+    }
+    
+    // Hide skip button for passport video
+    if (skipBtn) {
+        skipBtn.style.display = 'none';
+    }
+    
+    // Stop background music
+    if (typeof stopBackgroundMusic === 'function') {
+        stopBackgroundMusic();
     }
     
     // Set video source to passport video
@@ -2383,6 +2518,7 @@ window.skipPassportVideo = function() {
     
     const stageVideoDiv = document.getElementById('stage-video');
     const video = document.getElementById('stage-video-player');
+    const skipBtn = document.getElementById('skip-stage-btn');
     
     // Fade out
     stageVideoDiv.classList.remove('active');
@@ -2390,6 +2526,11 @@ window.skipPassportVideo = function() {
     // Pause video
     if (video) {
         video.pause();
+    }
+    
+    // Show skip button again for next stage video
+    if (skipBtn) {
+        skipBtn.style.display = 'block';
     }
     
     // Hide and show game complete modal
